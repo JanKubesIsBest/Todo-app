@@ -104,9 +104,7 @@ class _HomePageState extends State<HomePage> {
     final database = await openDatabase(
       join(await getDatabasesPath(), 'to_do_test.db'),
       onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT,)',
-        );
+        return createTable(db);
       },
       version: 1,
     );
@@ -128,13 +126,17 @@ class _HomePageState extends State<HomePage> {
     final database = await openDatabase(
       join(await getDatabasesPath(), 'to_do_test.db'),
       onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT)',
-        );
+        return createTable(db);
       },
       version: 1,
     );
     final List<Map<String, dynamic>> maps = await database.query('todos');
     return maps;
+  }
+
+  Future<void> createTable(Database db) {
+    return db.execute(
+      'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
+    );
   }
 }
