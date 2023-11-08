@@ -30,7 +30,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(retrieveTodos());
     addNewTodoToDatabase();
     return Scaffold(
       body: Stack(
@@ -59,7 +58,14 @@ class _HomePageState extends State<HomePage> {
                         fontSize: 20,
                         fontWeight: FontWeight.w100),
                   ),
-                  const Text("HI"),
+                  FutureBuilder(future: retrieveTodos(), builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      print(snapshot.data);
+                      return Text("Data");
+                    } else {
+                      return  Text("loading");
+                    }
+                  }),
                 ],
               ),
             ),
@@ -113,7 +119,7 @@ class _HomePageState extends State<HomePage> {
     var db = await database;
     await db.insert(
       'todos',
-      {'id': "0", 'name': "mouffins"},
+      {'name': "muffins1"},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -123,12 +129,12 @@ class _HomePageState extends State<HomePage> {
       join(await getDatabasesPath(), 'to_do_test.db'),
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT,)',
+          'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT)',
         );
       },
       version: 1,
     );
-    final List<Map<String, dynamic>> maps = await database.query('dogs');
+    final List<Map<String, dynamic>> maps = await database.query('todos');
     return maps;
   }
 }
