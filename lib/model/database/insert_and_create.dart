@@ -5,7 +5,7 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../components/todo/Todo.dart';
+import '../todo/Todo.dart';
 
 void addNewTodoToDatabase() async {
   WidgetsFlutterBinding.ensureInitialized();

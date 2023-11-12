@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 
 import '../../model/database/insert_and_create.dart';
 import '../../model/database/retrieve.dart';
@@ -31,7 +32,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    addNewTodoToDatabase();
     return Scaffold(
       body: Stack(
         children: [
@@ -63,18 +63,20 @@ class _HomePageState extends State<HomePage> {
                       future: retrieveTodos(),
                       builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
                         if (snapshot.hasData) {
-                          print(snapshot.data);
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data?.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(snapshot.data?[index]["description"]),
-                              );
-                            },
+                          return Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(0),
+                              shrinkWrap: true,
+                              itemCount: snapshot.data?.length,
+                              itemBuilder: (context, index) {
+                                return TodoComponent(name_of_a_todo: snapshot.data?[index]["name"]);
+                              },
+                            ),
                           );
                         } else {
-                          return Text("loading");
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
                       }),
                 ],
