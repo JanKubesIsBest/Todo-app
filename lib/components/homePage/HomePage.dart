@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                               shrinkWrap: true,
                               itemCount: snapshot.data?.length,
                               itemBuilder: (context, index) {
-                                return TodoComponent(name_of_a_todo: snapshot.data?[index]["name"]);
+                                return TodoComponent(nameOfATodo: snapshot.data?[index]["name"], id: snapshot.data?[index]["id"],);
                               },
                             ),
                           );

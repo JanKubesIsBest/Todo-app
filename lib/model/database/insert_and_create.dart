@@ -1,16 +1,10 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../todo/Todo.dart';
 
-void addNewTodoToDatabase() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-
+Future openTodoDatabase() async {
   final database = await openDatabase(
     join(await getDatabasesPath(), 'to_do_test.db'),
     onCreate: (db, version) {
@@ -18,6 +12,14 @@ void addNewTodoToDatabase() async {
     },
     version: 1,
   );
+
+  return database;
+}
+
+void addNewTodoToDatabase() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final database = await openTodoDatabase();
+
   const todo = Todo(
       todoName: "Buy creatine",
       description: "Buy creatine in the nearest shop");

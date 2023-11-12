@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:unfuckyourlife/model/database/delete.dart';
 
 class TodoComponent extends StatelessWidget {
-  final String name_of_a_todo;
-
-  const TodoComponent({super.key, required this.name_of_a_todo});
+  final String nameOfATodo;
+  final int id;
+  const TodoComponent({super.key, required this.nameOfATodo, required this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +17,11 @@ class TodoComponent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                name_of_a_todo,
+                nameOfATodo,
                 style: const TextStyle(fontSize: 20),
               ),
               IconButton(onPressed: () => {
-
+                deleteTodo(id),
               }, icon: const Icon(Icons.delete))
             ],
           ),
