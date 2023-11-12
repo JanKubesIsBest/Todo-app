@@ -14,6 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String name = "";
+  List<Map<String, dynamic>> _todos = [];
 
   @override
   void initState() {
@@ -63,13 +64,19 @@ class _HomePageState extends State<HomePage> {
                       future: retrieveTodos(),
                       builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
                         if (snapshot.hasData) {
+                          if (snapshot.data!.isEmpty) {
+                            _todos = [];
+                          } else {
+                            _todos = [...?snapshot.data];
+                          }
+
                           return Expanded(
                             child: ListView.builder(
                               padding: const EdgeInsets.all(0),
                               shrinkWrap: true,
                               itemCount: snapshot.data?.length,
                               itemBuilder: (context, index) {
-                                return TodoComponent(nameOfATodo: snapshot.data?[index]["name"], id: snapshot.data?[index]["id"],);
+                                return TodoComponent(nameOfATodo: snapshot.data?[index]["name"], id: snapshot.data?[index]["id"], placeInTheTodosList: index, removeTodoInUi: removeFromTodoList,);
                               },
                             ),
                           );
@@ -108,5 +115,11 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  void removeFromTodoList(int placeInList) {
+    setState(() {
+      _todos.removeAt(placeInList);
+    });
   }
 }

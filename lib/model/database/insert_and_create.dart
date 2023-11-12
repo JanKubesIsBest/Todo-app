@@ -23,11 +23,11 @@ void addNewTodoToDatabase() async {
   const todo = Todo(
       todoName: "Buy creatine",
       description: "Buy creatine in the nearest shop");
-  insertTodo(database, todo);
+  _insertTodo(database, todo);
 }
 
 // Define a function that inserts dogs into the database
-Future<void> insertTodo(database, Todo todo) async {
+Future<void> _insertTodo(database, Todo todo) async {
   // Get a reference to the database.
   var db = await database;
   await db.insert(
