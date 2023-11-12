@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:unfuckyourlife/components/todo/Todo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -58,14 +59,24 @@ class _HomePageState extends State<HomePage> {
                         fontSize: 20,
                         fontWeight: FontWeight.w100),
                   ),
-                  FutureBuilder(future: retrieveTodos(), builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.hasData) {
-                      print(snapshot.data);
-                      return Text("Data");
-                    } else {
-                      return  Text("loading");
-                    }
-                  }),
+                  FutureBuilder(
+                      future: retrieveTodos(),
+                      builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                        if (snapshot.hasData) {
+                          print(snapshot.data);
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: snapshot.data?.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(snapshot.data?[index]["description"]),
+                              );
+                            },
+                          );
+                        } else {
+                          return Text("loading");
+                        }
+                      }),
                 ],
               ),
             ),
@@ -108,21 +119,24 @@ class _HomePageState extends State<HomePage> {
       },
       version: 1,
     );
-    insertTodo(database);
+    const todo = Todo(
+        todoName: "Buy creatine",
+        description: "Buy creatine in the nearest shop");
+    insertTodo(database, todo);
   }
 
   // Define a function that inserts dogs into the database
-  Future<void> insertTodo(database) async {
+  Future<void> insertTodo(database, Todo todo) async {
     // Get a reference to the database.
     var db = await database;
     await db.insert(
       'todos',
-      {'name': "muffins1"},
+      todo.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Future retrieveTodos() async {
+  Future<List<Map<String, dynamic>>> retrieveTodos() async {
     final database = await openDatabase(
       join(await getDatabasesPath(), 'to_do_test.db'),
       onCreate: (db, version) {

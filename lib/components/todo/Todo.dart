@@ -12,10 +12,11 @@ class Todo {
   Map<String, dynamic> toMap() {
     return {
       'name': todoName,
-      'age': description,
+      'description': description,
     };
   }
 
+  // Will be useful when printing
   @override
   String toString() {
     return 'Todo{todo_name: $todoName, description: $description}';
