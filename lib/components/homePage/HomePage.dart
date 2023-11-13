@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
+import 'package:unfuckyourlife/model/todo/Todo.dart';
 
 import '../../model/database/insert_and_create.dart';
 import '../../model/database/retrieve.dart';
@@ -16,9 +17,7 @@ class _HomePageState extends State<HomePage> {
   String name = "";
   List<Map<String, dynamic>> _todos = [];
 
-  String newTodoName = "";
   final newTodoNameController = TextEditingController();
-  String newTodoDescription = "";
   final newTodoDescriptionController = TextEditingController();
 
   @override
@@ -190,6 +189,11 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               child: const Text('Add'),
               onPressed: () {
+                final newTodo = Todo(todoName: newTodoNameController.value.text, description: newTodoDescriptionController.value.text);
+                addNewTodoToDatabase(newTodo);
+                setState(() {
+                  _todos.add(newTodo.toMap());
+                });
                 Navigator.of(context).pop();
               },
             ),

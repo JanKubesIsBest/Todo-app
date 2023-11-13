@@ -16,13 +16,10 @@ Future openTodoDatabase() async {
   return database;
 }
 
-void addNewTodoToDatabase() async {
+void addNewTodoToDatabase(Todo todo) async {
   WidgetsFlutterBinding.ensureInitialized();
   final database = await openTodoDatabase();
 
-  const todo = Todo(
-      todoName: "Buy creatine",
-      description: "Buy creatine in the nearest shop");
   _insertTodo(database, todo);
 }
 
