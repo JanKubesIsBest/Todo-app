@@ -16,10 +16,25 @@ class _HomePageState extends State<HomePage> {
   String name = "";
   List<Map<String, dynamic>> _todos = [];
 
+  String newTodoName = "";
+  final newTodoNameController = TextEditingController();
+  String newTodoDescription = "";
+  final newTodoDescriptionController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     getName();
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is removed from the
+    // widget tree.
+    newTodoNameController.dispose();
+    newTodoDescriptionController.dispose();
+
+    super.dispose();
   }
 
   void getName() async {
@@ -62,7 +77,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   FutureBuilder(
                       future: retrieveTodos(),
-                      builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
                         if (snapshot.hasData) {
                           if (snapshot.data!.isEmpty) {
                             _todos = [];
@@ -76,7 +92,12 @@ class _HomePageState extends State<HomePage> {
                               shrinkWrap: true,
                               itemCount: snapshot.data?.length,
                               itemBuilder: (context, index) {
-                                return TodoComponent(nameOfATodo: snapshot.data?[index]["name"], id: snapshot.data?[index]["id"], placeInTheTodosList: index, removeTodoInUi: removeFromTodoList,);
+                                return TodoComponent(
+                                  nameOfATodo: snapshot.data?[index]["name"],
+                                  id: snapshot.data?[index]["id"],
+                                  placeInTheTodosList: index,
+                                  removeTodoInUi: removeFromTodoList,
+                                );
                               },
                             ),
                           );
@@ -105,8 +126,8 @@ class _HomePageState extends State<HomePage> {
                     size: 30,
                   ),
                   color: Colors.white,
-                  onPressed: () {
-                    addNewTodoToDatabase();
+                  onPressed: () async {
+                    await _showMyDialog();
                   },
                 ),
               ),
@@ -121,5 +142,60 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _todos.removeAt(placeInList);
     });
+  }
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('New Todo'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text('Add new todo:'),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: 'Enter todo name',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                    controller: newTodoNameController,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: 'Enter description',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                    controller: newTodoDescriptionController,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Add'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
