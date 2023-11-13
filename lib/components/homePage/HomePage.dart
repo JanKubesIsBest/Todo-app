@@ -194,6 +194,7 @@ class _HomePageState extends State<HomePage> {
                 setState(() {
                   _todos.add(newTodo.toMap());
                 });
+                resetControllers();
                 Navigator.of(context).pop();
               },
             ),
@@ -201,5 +202,10 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+
+  void resetControllers(){
+    newTodoNameController.clear();
+    newTodoDescriptionController.clear();
   }
 }
