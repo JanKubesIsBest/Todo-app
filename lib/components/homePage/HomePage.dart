@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
+import 'package:unfuckyourlife/theme/theme.dart';
 
 import '../../model/database/insert_and_create.dart';
 import '../../model/database/retrieve.dart';
@@ -126,6 +127,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                   color: Colors.white,
                   onPressed: () async {
+                    // Doing it before so it is reset even when you close dialog
+                    // by taping outside of it.
+                    resetControllers();
                     await _showMyDialog();
                   },
                 ),
@@ -146,65 +150,77 @@ class _HomePageState extends State<HomePage> {
   Future<void> _showMyDialog() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: true,
+
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('New Todo'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                const Text('Add new todo:'),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      hintText: 'Enter todo name',
-                      hintStyle: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                      ),
-                    ),
-                    controller: newTodoNameController,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      hintText: 'Enter description',
-                      hintStyle: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                      ),
-                    ),
-                    controller: newTodoDescriptionController,
-                  ),
-                ),
-              ],
+        return Theme(
+          data: ThemeData(
+            dialogBackgroundColor: const Color.fromARGB(250, 22, 22, 23),
+            inputDecorationTheme: InputDecorationTheme(
+              border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+              hintStyle: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+              ),
+              labelStyle: const TextStyle(color: Colors.white),
             ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () {
-                final newTodo = Todo(todoName: newTodoNameController.value.text, description: newTodoDescriptionController.value.text);
-                addNewTodoToDatabase(newTodo);
-                setState(() {
-                  _todos.add(newTodo.toMap());
-                });
-                resetControllers();
-                Navigator.of(context).pop();
-              },
+          child: AlertDialog(
+            title: const Text('New Todo', style: TextStyle(color: Colors.white),),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  const Text('Add new todo:', style: TextStyle(color: Colors.white),),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Enter todo name',
+                      ),
+                      controller: newTodoNameController,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Description',
+                      ),
+                      controller: newTodoDescriptionController,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Add'),
+                onPressed: () {
+                  final newTodo = Todo(
+                      todoName: newTodoNameController.value.text,
+                      description: newTodoDescriptionController.value.text);
+                  addNewTodoToDatabase(newTodo);
+                  setState(() {
+                    _todos.add(newTodo.toMap());
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
         );
       },
     );
   }
 
-  void resetControllers(){
+  void resetControllers() {
     newTodoNameController.clear();
     newTodoDescriptionController.clear();
   }

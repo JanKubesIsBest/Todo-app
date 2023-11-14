@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/HomePage.dart';
 import 'package:unfuckyourlife/components/initialPage/InitialPage.dart';
+import 'package:unfuckyourlife/theme/theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,11 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Unfuck your life',
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.black,
-        primaryColor: Colors.black,
-        useMaterial3: true,
-      ),
+      theme: unfuckYourLifeTheme,
       home: FutureBuilder<bool>(
         future: isItFirstTime(),
         builder: (context, snapshot) {
