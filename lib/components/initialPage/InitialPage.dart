@@ -143,6 +143,7 @@ class _MyHomePageState extends State<InitialPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: CustomPaint(
         painter: Painter(
             yPosition: animation.value,
@@ -151,7 +152,6 @@ class _MyHomePageState extends State<InitialPage>
         child: Opacity(
           opacity: widgetAnimationOpacity.value,
           child: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
             child: Column(
               children: [
                 SizedBox(
@@ -170,6 +170,9 @@ class _MyHomePageState extends State<InitialPage>
                     ),
                   ),
                   controller: nameControler,
+                  onChanged: (value) async {
+                    prefs.setString("name", value);
+                  },
                 ),
                 const SizedBox(
                   height: 10,
@@ -183,9 +186,6 @@ class _MyHomePageState extends State<InitialPage>
                       color: Colors.white.withOpacity(0.7),
                     ),
                   ),
-                  onChanged: (value) async {
-                    prefs.setString("name", value);
-                  },
                 ),
                 const SizedBox(
                   height: 10,
