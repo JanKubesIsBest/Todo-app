@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
-import 'package:unfuckyourlife/theme/theme.dart';
 
 import '../../model/database/insert_and_create.dart';
 import '../../model/database/retrieve.dart';
@@ -21,6 +20,8 @@ class _HomePageState extends State<HomePage> {
 
   final newTodoNameController = TextEditingController();
   final newTodoDescriptionController = TextEditingController();
+
+  late DateTime selectedDateForDeadline = getTomorrow();
 
   @override
   void initState() {
@@ -153,84 +154,116 @@ class _HomePageState extends State<HomePage> {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return Theme(
-          data: ThemeData(
-            dialogBackgroundColor: const Color.fromARGB(250, 22, 22, 23),
-            inputDecorationTheme: InputDecorationTheme(
-              border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
-              hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> selectDate(BuildContext context) async {
+              final DateTime? picked = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDateForDeadline,
+                  firstDate: DateTime(2015, 8),
+                  lastDate: DateTime(2101));
+              if (picked != null && picked != selectedDateForDeadline) {
+                setState(() {
+                  selectedDateForDeadline = picked;
+                });
+              }
+            }
+
+            return Theme(
+              data: ThemeData(
+                dialogBackgroundColor: const Color.fromARGB(250, 22, 22, 23),
+                inputDecorationTheme: InputDecorationTheme(
+                  border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  hintStyle: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  labelStyle: const TextStyle(color: Colors.white),
+                ),
               ),
-              labelStyle: const TextStyle(color: Colors.white),
-            ),
-          ),
-          child: AlertDialog(
-            title: const Text(
-              'New Todo',
-              style: TextStyle(color: Colors.white),
-            ),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  const Text(
-                    'Add new todo:',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: 'Enter todo name',
+              child: AlertDialog(
+                title: const Text(
+                  'New Todo',
+                  style: TextStyle(color: Colors.white),
+                ),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      const Text(
+                        'Add new todo:',
+                        style: TextStyle(color: Colors.white),
                       ),
-                      controller: newTodoNameController,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: 'Description',
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Enter todo name',
+                          ),
+                          controller: newTodoNameController,
+                        ),
                       ),
-                      controller: newTodoDescriptionController,
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Description',
+                          ),
+                          controller: newTodoDescriptionController,
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => selectDate(context),
+                        child: Text(
+                            '${selectedDateForDeadline.day.toString()}.${selectedDateForDeadline.month.toString()}.${selectedDateForDeadline.year.toString()}'),
+                      )
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: const Text('Add'),
+                    onPressed: () {
+                      final newTodo = Todo(
+                        name: newTodoNameController.value.text,
+                        description: newTodoDescriptionController.value.text,
+                        created: DateTime.now(),
+                      );
+                      addNewTodoToDatabase(newTodo);
+                      uiUpdateTodos(newTodo);
+                      Navigator.of(context).pop();
+                    },
                   ),
                 ],
               ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text('Add'),
-                onPressed: () {
-                  final newTodo = Todo(
-                    name: newTodoNameController.value.text,
-                    description: newTodoDescriptionController.value.text,
-                    created: DateTime.now(),
-                  );
-                  addNewTodoToDatabase(newTodo);
-                  setState(() {
-                    _todos.add(newTodo.toMap());
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
+  void uiUpdateTodos(Todo newTodo) {
+    setState(() {
+      _todos.add(newTodo.toMap());
+    });
+  }
+
   void resetControllers() {
     newTodoNameController.clear();
     newTodoDescriptionController.clear();
+    selectedDateForDeadline = getTomorrow();
+  }
+
+  DateTime getTomorrow() {
+    return DateTime(
+        DateTime.now().year, DateTime.now().month, DateTime.now().day + 1);
   }
 }
