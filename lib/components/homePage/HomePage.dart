@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
+import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 import 'package:unfuckyourlife/theme/theme.dart';
 
 import '../../model/database/insert_and_create.dart';
@@ -93,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                               itemCount: snapshot.data?.length,
                               itemBuilder: (context, index) {
                                 return TodoComponent(
-                                  todo: Todo(name: snapshot.data?[index]["name"], description: snapshot.data?[index]["description"]),
+                                  todo: mapToTodo(snapshot.data![index]),
                                   id: snapshot.data?[index]["id"],
                                   placeInTheTodosList: index,
                                   removeTodoInUi: removeFromTodoList,
@@ -151,13 +152,13 @@ class _HomePageState extends State<HomePage> {
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
-
       builder: (BuildContext context) {
         return Theme(
           data: ThemeData(
             dialogBackgroundColor: const Color.fromARGB(250, 22, 22, 23),
             inputDecorationTheme: InputDecorationTheme(
-              border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+              border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
               hintStyle: TextStyle(
                 color: Colors.white.withOpacity(0.7),
               ),
@@ -165,11 +166,17 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           child: AlertDialog(
-            title: const Text('New Todo', style: TextStyle(color: Colors.white),),
+            title: const Text(
+              'New Todo',
+              style: TextStyle(color: Colors.white),
+            ),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  const Text('Add new todo:', style: TextStyle(color: Colors.white),),
+                  const Text(
+                    'Add new todo:',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
@@ -204,8 +211,10 @@ class _HomePageState extends State<HomePage> {
                 child: const Text('Add'),
                 onPressed: () {
                   final newTodo = Todo(
-                      name: newTodoNameController.value.text,
-                      description: newTodoDescriptionController.value.text);
+                    name: newTodoNameController.value.text,
+                    description: newTodoDescriptionController.value.text,
+                    created: DateTime.now(),
+                  );
                   addNewTodoToDatabase(newTodo);
                   setState(() {
                     _todos.add(newTodo.toMap());
