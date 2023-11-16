@@ -1,17 +1,17 @@
 class Todo {
   // Id is assigned automatically
-  final String todoName;
+  final String name;
   final String description;
 
   // TODO: Add time created, deadline.
   const Todo({
-    required this.todoName,
+    required this.name,
     required this.description,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'name': todoName,
+      'name': name,
       'description': description,
     };
   }
@@ -19,6 +19,6 @@ class Todo {
   // Will be useful when printing
   @override
   String toString() {
-    return 'Todo{todo_name: $todoName, description: $description}';
+    return 'Todo{todo_name: $name, description: $description}';
   }
 }

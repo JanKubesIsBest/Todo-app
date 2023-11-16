@@ -93,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                               itemCount: snapshot.data?.length,
                               itemBuilder: (context, index) {
                                 return TodoComponent(
-                                  nameOfATodo: snapshot.data?[index]["name"],
+                                  todo: Todo(name: snapshot.data?[index]["name"], description: snapshot.data?[index]["description"]),
                                   id: snapshot.data?[index]["id"],
                                   placeInTheTodosList: index,
                                   removeTodoInUi: removeFromTodoList,
@@ -204,7 +204,7 @@ class _HomePageState extends State<HomePage> {
                 child: const Text('Add'),
                 onPressed: () {
                   final newTodo = Todo(
-                      todoName: newTodoNameController.value.text,
+                      name: newTodoNameController.value.text,
                       description: newTodoDescriptionController.value.text);
                   addNewTodoToDatabase(newTodo);
                   setState(() {
