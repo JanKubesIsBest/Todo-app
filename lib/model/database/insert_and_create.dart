@@ -36,6 +36,6 @@ Future<void> _insertTodo(database, Todo todo) async {
 
 Future<void> createTable(Database db) {
   return db.execute(
-    'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING)',
+    'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING, deadline STRING)',
   );
 }

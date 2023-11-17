@@ -235,6 +235,7 @@ class _HomePageState extends State<HomePage> {
                         name: newTodoNameController.value.text,
                         description: newTodoDescriptionController.value.text,
                         created: DateTime.now(),
+                        deadline: selectedDateForDeadline,
                       );
                       addNewTodoToDatabase(newTodo);
                       uiUpdateTodos(newTodo);

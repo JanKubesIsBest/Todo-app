@@ -13,7 +13,6 @@ class TodoComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(todo.created);
     return Container(
       constraints: const BoxConstraints(minHeight: 80),
       // TODO: Make better design, remember, design is one of the main things of this app.
