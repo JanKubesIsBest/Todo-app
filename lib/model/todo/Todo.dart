@@ -1,16 +1,19 @@
 class Todo {
   // Id is assigned automatically
+  final int? id;
   final String name;
   final String description;
   final DateTime created;
   final DateTime deadline;
 
   // TODO: Add time created, deadline.
+  // Id is not required, bcs we don't even use it when building components.
   const Todo({
     required this.created,
     required this.name,
     required this.description,
     required this.deadline,
+    this.id,
   });
 
   Map<String, dynamic> toMap() {

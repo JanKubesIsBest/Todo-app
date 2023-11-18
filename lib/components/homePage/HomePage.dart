@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String name = "";
-  List<Map<String, dynamic>> _todos = [];
+  List<Todo> _todos = [];
 
   final newTodoNameController = TextEditingController();
   final newTodoDescriptionController = TextEditingController();
@@ -86,17 +86,19 @@ class _HomePageState extends State<HomePage> {
                             _todos = [];
                             return const Text("Gay");
                           } else {
-                            _todos = [...?snapshot.data];
+                            for (var i = 0; i < snapshot.data!.length; i++) {
+                              _todos.add(mapToTodo(snapshot.data![i]));
+                            }
                           }
                           bool runAgain = true;
                           if (_todos.length > 1) {
                             while (runAgain) {
                               runAgain = false;
                               for (var i = 1; i < _todos.length; i++) {
-                                int dayX = mapToTodo(_todos[i])
+                                int dayX = _todos[i]
                                     .deadline
                                     .millisecondsSinceEpoch;
-                                int dayY = mapToTodo(_todos[i - 1])
+                                int dayY = _todos[i - 1]
                                     .deadline
                                     .millisecondsSinceEpoch;
 
@@ -108,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                               }
                             }
                           }
-
+                          print(_todos);
                           return Expanded(
                             child: ListView.builder(
                               padding: const EdgeInsets.all(0),
@@ -116,8 +118,8 @@ class _HomePageState extends State<HomePage> {
                               itemCount: _todos.length,
                               itemBuilder: (context, index) {
                                 return TodoComponent(
-                                  todo: mapToTodo(_todos[index]),
-                                  id: _todos[index]["id"],
+                                  todo: _todos[index],
+                                  id: _todos[index].id as int,
                                   placeInTheTodosList: index,
                                   removeTodoInUi: removeFromTodoList,
                                 );
@@ -129,7 +131,8 @@ class _HomePageState extends State<HomePage> {
                             child: CircularProgressIndicator(),
                           );
                         }
-                      }),
+                      },
+                  ),
                 ],
               ),
             ),
@@ -274,7 +277,7 @@ class _HomePageState extends State<HomePage> {
 
   void uiUpdateTodos(Todo newTodo) {
     setState(() {
-      _todos.add(newTodo.toMap());
+      _todos.add(newTodo);
     });
   }
 
