@@ -84,19 +84,40 @@ class _HomePageState extends State<HomePage> {
                         if (snapshot.hasData) {
                           if (snapshot.data!.isEmpty) {
                             _todos = [];
+                            return const Text("Gay");
                           } else {
                             _todos = [...?snapshot.data];
+                          }
+                          bool runAgain = true;
+                          if (_todos.length > 1) {
+                            while (runAgain) {
+                              runAgain = false;
+                              for (var i = 1; i < _todos.length; i++) {
+                                int dayX = mapToTodo(_todos[i])
+                                    .deadline
+                                    .millisecondsSinceEpoch;
+                                int dayY = mapToTodo(_todos[i - 1])
+                                    .deadline
+                                    .millisecondsSinceEpoch;
+
+                                if (dayX.compareTo(dayY) < 0) {
+                                  _todos.insert(i - 1, _todos[i]);
+                                  _todos.removeAt(i + 1);
+                                  runAgain = true;
+                                }
+                              }
+                            }
                           }
 
                           return Expanded(
                             child: ListView.builder(
                               padding: const EdgeInsets.all(0),
                               shrinkWrap: true,
-                              itemCount: snapshot.data?.length,
+                              itemCount: _todos.length,
                               itemBuilder: (context, index) {
                                 return TodoComponent(
-                                  todo: mapToTodo(snapshot.data![index]),
-                                  id: snapshot.data?[index]["id"],
+                                  todo: mapToTodo(_todos[index]),
+                                  id: _todos[index]["id"],
                                   placeInTheTodosList: index,
                                   removeTodoInUi: removeFromTodoList,
                                 );
