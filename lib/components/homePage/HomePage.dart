@@ -78,60 +78,29 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.w100),
                   ),
                   FutureBuilder(
-                      future: retrieveTodos(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-                        if (snapshot.hasData) {
-                          if (snapshot.data!.isEmpty) {
-                            _todos = [];
-                            return const Text("Gay");
-                          } else {
-                            for (var i = 0; i < snapshot.data!.length; i++) {
-                              _todos.add(mapToTodo(snapshot.data![i]));
-                            }
-                          }
-                          bool runAgain = true;
-                          if (_todos.length > 1) {
-                            while (runAgain) {
-                              runAgain = false;
-                              for (var i = 1; i < _todos.length; i++) {
-                                int dayX = _todos[i]
-                                    .deadline
-                                    .millisecondsSinceEpoch;
-                                int dayY = _todos[i - 1]
-                                    .deadline
-                                    .millisecondsSinceEpoch;
-
-                                if (dayX.compareTo(dayY) < 0) {
-                                  _todos.insert(i - 1, _todos[i]);
-                                  _todos.removeAt(i + 1);
-                                  runAgain = true;
-                                }
-                              }
-                            }
-                          }
-                          print(_todos);
-                          return Expanded(
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(0),
-                              shrinkWrap: true,
-                              itemCount: _todos.length,
-                              itemBuilder: (context, index) {
-                                return TodoComponent(
-                                  todo: _todos[index],
-                                  id: _todos[index].id as int,
-                                  placeInTheTodosList: index,
-                                  removeTodoInUi: removeFromTodoList,
-                                );
-                              },
-                            ),
-                          );
-                        } else {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                    future: retrieveTodos(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                      if (snapshot.hasData) {
+                        if (snapshot.data!.isEmpty) {
+                          _todos = [];
+                          return const Text("Gay");
                         }
-                      },
+                        retrieveTodosSorted(snapshot.data!);
+                        List<Widget> widgets = todosWidgets(_todos);
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: widgets.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return widgets[index];
+                          },
+                        );
+                      } else {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
                   ),
                 ],
               ),
@@ -262,7 +231,7 @@ class _HomePageState extends State<HomePage> {
                         deadline: selectedDateForDeadline,
                       );
                       addNewTodoToDatabase(newTodo);
-                      uiUpdateTodos(newTodo);
+                      uiUpdateTodos();
                       Navigator.of(context).pop();
                     },
                   ),
@@ -275,9 +244,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void uiUpdateTodos(Todo newTodo) {
+  void uiUpdateTodos() async {
+    List<Map<String, dynamic>> retrievedTodos = await retrieveTodos();
+    retrieveTodosSorted(retrievedTodos);
     setState(() {
-      _todos.add(newTodo);
+      _todos = _todos;
     });
   }
 
@@ -290,5 +261,59 @@ class _HomePageState extends State<HomePage> {
   DateTime getTomorrow() {
     return DateTime(
         DateTime.now().year, DateTime.now().month, DateTime.now().day + 1);
+  }
+
+  void retrieveTodosSorted(List<Map<String, dynamic>> map) {
+    _todos = [];
+    for (var i = 0; i < map.length; i++) {
+      _todos.add(mapToTodo(map[i]));
+    }
+    bool runAgain = true;
+    if (_todos.length > 1) {
+      while (runAgain) {
+        runAgain = false;
+        for (var i = 1; i < _todos.length; i++) {
+          int dayX = _todos[i].deadline.millisecondsSinceEpoch;
+          int dayY = _todos[i - 1].deadline.millisecondsSinceEpoch;
+
+          if (dayX.compareTo(dayY) < 0) {
+            _todos.insert(i - 1, _todos[i]);
+            _todos.removeAt(i + 1);
+            runAgain = true;
+          }
+        }
+      }
+    }
+  }
+
+  List<Widget> todosWidgets(List<Todo> todoList) {
+    List<Widget> widgets = [];
+
+    bool isToday = false;
+
+    bool addedToday = false;
+    bool addedOther = false;
+
+    for (int i = 0; i<todoList.length; i++) {
+      if (todoList[i].deadline.year == DateTime.now().year && todoList[i].deadline.day == DateTime.now().day && todoList[i].deadline.month == DateTime.now().month){
+        isToday = true;
+      } else {
+        isToday = false;
+      }
+
+      if (isToday && !addedToday){
+        widgets.add(const Text("Today"));
+        widgets.add(const Divider());
+        addedToday = true;
+      }
+      if (!isToday && !addedOther) {
+        widgets.add(const Text("Other"));
+        widgets.add(const Divider());
+        addedOther = true;
+      }
+
+      widgets.add(TodoComponent(todo: todoList[i], placeInTheTodosList: i, removeTodoInUi: removeFromTodoList));
+    }
+    return widgets;
   }
 }

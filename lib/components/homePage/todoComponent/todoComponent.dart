@@ -5,11 +5,10 @@ import '../../../model/todo/Todo.dart';
 
 class TodoComponent extends StatelessWidget {
   final Todo todo;
-  final int id;
   final int placeInTheTodosList;
 
   final Function(int placeInTheTodosList) removeTodoInUi;
-  const TodoComponent({super.key, required this.todo, required this.id, required this.placeInTheTodosList, required this.removeTodoInUi});
+  const TodoComponent({super.key, required this.todo, required this.placeInTheTodosList, required this.removeTodoInUi});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +29,7 @@ class TodoComponent extends StatelessWidget {
                     style: const TextStyle(fontSize: 20),
                   ),
                   IconButton(onPressed: () => {
-                    deleteTodo(id),
+                    deleteTodo(todo.id as int),
                     removeTodoInUi(placeInTheTodosList),
                   }, icon: const Icon(Icons.delete),),
                 ],
