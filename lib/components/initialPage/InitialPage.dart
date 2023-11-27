@@ -89,6 +89,8 @@ class _MyHomePageState extends State<InitialPage>
   @override
   void dispose() {
     controller.dispose();
+    buttonController.dispose();
+    widgetController.dispose();
     super.dispose();
   }
 
