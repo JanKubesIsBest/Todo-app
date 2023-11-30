@@ -3,8 +3,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/HomePage.dart';
 import 'package:unfuckyourlife/components/initialPage/InitialPage.dart';
 import 'package:unfuckyourlife/theme/theme.dart';
+import "package:timezone/data/latest.dart" as tz;
+
+import 'model/notification/notifications.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  NotificationService().initNotification();
+  tz.initializeTimeZones();
+
+  NotificationService().scheduleNotification(
+      title: 'Scheduled Notification',
+      body: 'Zkouska',
+      scheduledNotificationDateTime: DateTime.now());
+
   runApp(const MyApp());
 }
 
