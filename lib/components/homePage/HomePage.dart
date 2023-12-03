@@ -56,6 +56,7 @@ class _HomePageState extends State<HomePage> {
         name = prefs.getString("name")!;
       });
     }
+    print(prefs.getString("defaultNotifyingTime"));
   }
 
   @override
@@ -334,11 +335,13 @@ void askForPermissions() async {
   if (status.isDenied) {
     Permission.notification.request();
   }
-
+  /*/
   DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, DateTime.now().hour, DateTime.now().minute, DateTime.now().second + 10);
 
   NotificationService().scheduleNotification(
       title: 'Scheduled Notification',
       body: 'Zkouska',
       scheduledNotificationDateTime: date);
+
+   */
 }

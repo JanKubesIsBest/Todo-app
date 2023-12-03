@@ -33,6 +33,7 @@ class _MyHomePageState extends State<InitialPage>
 
   late final SharedPreferences prefs;
 
+  TimeOfDay defaultTimeForNotifying = const TimeOfDay(hour: 12, minute: 0);
 
   final words = [
     "Hello",
@@ -139,9 +140,13 @@ class _MyHomePageState extends State<InitialPage>
 
     controller.forward();
   }
+
   void setPrefs() async {
     prefs = await SharedPreferences.getInstance();
+    // Time of a day will be set as hours/minutes in prefs...
+    prefs.setString("defaultNotifyingTime", "${defaultTimeForNotifying.hour}/${defaultTimeForNotifying.minute}");
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -211,6 +216,22 @@ class _MyHomePageState extends State<InitialPage>
                 const SizedBox(
                   height: 10,
                 ),
+                ElevatedButton(
+                  onPressed: () => _selectTime(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                  ),
+                  child: Text(
+                    'When do you want to be notified: ${defaultTimeForNotifying.format(context)}',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w100,
+                        fontSize: 15),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
                 Opacity(
                   opacity: buttonAnimationOpacity.value,
                   child: ElevatedButton(
@@ -238,6 +259,20 @@ class _MyHomePageState extends State<InitialPage>
         ),
       ),
     );
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked_s = await showTimePicker(
+      context: context,
+      initialTime: defaultTimeForNotifying,
+    );
+
+    if (picked_s != null && picked_s != defaultTimeForNotifying) {
+      setState(() {
+        defaultTimeForNotifying = picked_s;
+      });
+      prefs.setString("defaultNotifyingTime", "${defaultTimeForNotifying.hour}/${defaultTimeForNotifying.minute}");
+    }
   }
 }
 
