@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
@@ -6,6 +7,9 @@ import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 
 import '../../model/database/insert_and_create.dart';
 import '../../model/database/retrieve.dart';
+import '../../model/notification/notifications.dart';
+
+import "package:timezone/data/latest.dart" as tz;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,6 +31,12 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getName();
+
+    NotificationService().initNotification();
+    tz.initializeTimeZones();
+
+    WidgetsFlutterBinding.ensureInitialized();
+    askForPermissions();
   }
 
   @override
@@ -316,4 +326,19 @@ class _HomePageState extends State<HomePage> {
     }
     return widgets;
   }
+}
+
+void askForPermissions() async {
+  var status = await Permission.notification.status;
+  print(status);
+  if (status.isDenied) {
+    Permission.notification.request();
+  }
+
+  DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, DateTime.now().hour, DateTime.now().minute, DateTime.now().second + 10);
+
+  NotificationService().scheduleNotification(
+      title: 'Scheduled Notification',
+      body: 'Zkouska',
+      scheduledNotificationDateTime: date);
 }
