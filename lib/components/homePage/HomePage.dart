@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
@@ -26,17 +27,20 @@ class _HomePageState extends State<HomePage> {
   final newTodoDescriptionController = TextEditingController();
 
   late DateTime selectedDateForDeadline = getTomorrow();
+  late TimeOfDay defaultNotifyingTime;
+  late TimeOfDay notifyAt;
 
   @override
   void initState() {
     super.initState();
-    getName();
-
     NotificationService().initNotification();
     tz.initializeTimeZones();
 
     WidgetsFlutterBinding.ensureInitialized();
     askForPermissions();
+
+    getName();
+    getDefaultNotifyingTime();
   }
 
   @override
@@ -160,6 +164,7 @@ class _HomePageState extends State<HomePage> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
+
             Future<void> selectDate(BuildContext context) async {
               final DateTime? picked = await showDatePicker(
                   context: context,
@@ -169,6 +174,20 @@ class _HomePageState extends State<HomePage> {
               if (picked != null && picked != selectedDateForDeadline) {
                 setState(() {
                   selectedDateForDeadline = picked;
+                });
+              }
+            }
+
+
+            Future<void> selectTime(BuildContext context) async {
+              final TimeOfDay? pickedS = await showTimePicker(
+                context: context,
+                initialTime: notifyAt,
+              );
+
+              if (pickedS != null && pickedS != defaultNotifyingTime) {
+                setState(() {
+                  notifyAt = pickedS;
                 });
               }
             }
@@ -221,7 +240,12 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () => selectDate(context),
                         child: Text(
                             '${selectedDateForDeadline.day.toString()}.${selectedDateForDeadline.month.toString()}.${selectedDateForDeadline.year.toString()}'),
-                      )
+                      ),
+                      ElevatedButton(
+                        onPressed: () => selectTime(context),
+                        child: Text(
+                            notifyAt.format(context)),
+                      ),
                     ],
                   ),
                 ),
@@ -234,7 +258,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   TextButton(
                     child: const Text('Add'),
-                    onPressed: () {
+                    onPressed: () async {
                       final newTodo = Todo(
                         name: newTodoNameController.value.text,
                         description: newTodoDescriptionController.value.text,
@@ -243,6 +267,14 @@ class _HomePageState extends State<HomePage> {
                       );
                       addNewTodoToDatabase(newTodo);
                       uiUpdateTodos();
+
+                      // If the notification notifying time will be different from the time that all notifications are
+                      // are reminded ("Check all your tasks" after school day or something like that), add the notification time.
+                      if (notifyAt != defaultNotifyingTime){
+                        DateTime date = DateTime(selectedDateForDeadline.year, selectedDateForDeadline.month, selectedDateForDeadline.day, notifyAt.hour, notifyAt.minute);
+                        NotificationService().scheduleNotification(scheduledNotificationDateTime: date);
+                      }
+
                       Navigator.of(context).pop();
                     },
                   ),
@@ -272,6 +304,24 @@ class _HomePageState extends State<HomePage> {
   DateTime getTomorrow() {
     return DateTime(
         DateTime.now().year, DateTime.now().month, DateTime.now().day + 1);
+  }
+
+  void getDefaultNotifyingTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? timeInString = prefs.getString("defaultNotifyingTime");
+    // Should never happen
+    if (timeInString != null) {
+      // timeInString.split("/") => [hours, minutes
+      setState(() {
+        defaultNotifyingTime = TimeOfDay(hour: int.parse(timeInString.split("/")[0]), minute: int.parse(timeInString.split("/")[0]));
+        notifyAt = defaultNotifyingTime;
+      });
+    }
+    // Default
+    defaultNotifyingTime = const TimeOfDay(hour: 12, minute: 0);
+
+    // TODO: remove
+    print(await NotificationService().getActiveNotifications());
   }
 
   void retrieveTodosSorted(List<Map<String, dynamic>> map) {

@@ -46,5 +46,7 @@ class NotificationService {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime);
   }
-
+  Future<List<ActiveNotification>> getActiveNotifications() async {
+    return await notificationsPlugin.getActiveNotifications();
+  }
 }
