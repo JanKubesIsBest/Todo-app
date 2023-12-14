@@ -35,8 +35,6 @@ class NotificationService {
       String? body,
       String? payLoad,
       required DateTime scheduledNotificationDateTime}) async {
-    var _date = tz.TZDateTime(tz.local, tz.TZDateTime.now(tz.local).year, tz.TZDateTime.now(tz.local).month, tz.TZDateTime.now(tz.local).day, tz.TZDateTime.now(tz.local).hour, tz.TZDateTime.now(tz.local).minute, tz.TZDateTime.now(tz.local).second + 5, tz.TZDateTime.now(tz.local).millisecond);
-
     return notificationsPlugin.zonedSchedule(
         id,
         title,
@@ -46,7 +44,12 @@ class NotificationService {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime);
   }
-  Future<List<ActiveNotification>> getActiveNotifications() async {
-    return await notificationsPlugin.getActiveNotifications();
+  Future<List<PendingNotificationRequest>> getActiveNotifications() async {
+    return await notificationsPlugin.pendingNotificationRequests();
+  }
+
+  Future<void> showDailyAtTime() async {
+    print("show daily");
+    notificationsPlugin.periodicallyShow(0, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
   }
 }

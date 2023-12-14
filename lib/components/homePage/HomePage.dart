@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -41,6 +43,8 @@ class _HomePageState extends State<HomePage> {
 
     getName();
     getDefaultNotifyingTime();
+
+    checkIfTheNotifyingIsSet();
   }
 
   @override
@@ -60,7 +64,25 @@ class _HomePageState extends State<HomePage> {
         name = prefs.getString("name")!;
       });
     }
-    print(prefs.getString("defaultNotifyingTime"));
+  }
+
+  void checkIfTheNotifyingIsSet() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool("notifying") != true) {
+      DateTime startNotifyingAt = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 17, 45,);
+
+      print(startNotifyingAt);
+      if (startNotifyingAt.difference(DateTime.now()).inDays < 0) {
+        Timer(startNotifyingAt.add(const Duration(days: 1)).difference(DateTime.now()), () {
+          NotificationService().showDailyAtTime();
+        });
+      } else {
+        Timer(startNotifyingAt.difference(DateTime.now()), () {
+          NotificationService().showDailyAtTime();
+        });
+      }
+      prefs.setBool("notifying", true);
+    }
   }
 
   @override
