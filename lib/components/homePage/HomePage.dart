@@ -73,12 +73,15 @@ class _HomePageState extends State<HomePage> {
 
       print(startNotifyingAt);
       if (startNotifyingAt.difference(DateTime.now()).inDays < 0) {
+        // I plan to return id of the notifier
+        int id = await addNewNotifier(startNotifyingAt);
         Timer(startNotifyingAt.add(const Duration(days: 1)).difference(DateTime.now()), () {
-          NotificationService().showDailyAtTime();
+          NotificationService().showDailyAtTime(id);
         });
       } else {
+        int id = await addNewNotifier(startNotifyingAt);
         Timer(startNotifyingAt.difference(DateTime.now()), () {
-          NotificationService().showDailyAtTime();
+          NotificationService().showDailyAtTime(id);
         });
       }
       prefs.setBool("notifying", true);

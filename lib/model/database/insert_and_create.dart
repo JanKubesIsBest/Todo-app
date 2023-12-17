@@ -21,3 +21,16 @@ Future<void> _insertTodo(database, Todo todo) async {
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
 }
+
+Future<int> addNewNotifier( DateTime date) async{
+  WidgetsFlutterBinding.ensureInitialized();
+  final database = await openNotifierDatabase();
+
+  database.insert(
+    'notifications',
+    {'day': date.day.toString(), 'month': date.month.toString(), 'year': date.year.toString(), 'hour': date.hour.toString(), 'minute':date.minute.toString(),},
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+  // TODO: Make it so it actually rereturns id of notification
+  return 0;
+}

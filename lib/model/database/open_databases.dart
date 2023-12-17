@@ -20,11 +20,11 @@ Future<void> createTodoTable(Database db) {
   );
 }
 
-Future openNotyfiersDatabases() async {
+Future openNotifierDatabase() async {
   final database = await openDatabase(
-    join(await getDatabasesPath(), 'to_do_test.db'),
+    join(await getDatabasesPath(), 'notifications.db'),
     onCreate: (db, version) {
-      return createNotifyerDatabaseTable(db);
+      return createNotifierDatabaseTable(db);
     },
     version: 1,
   );
@@ -32,8 +32,8 @@ Future openNotyfiersDatabases() async {
   return database;
 }
 
-Future<void> createNotifyerDatabaseTable(Database db) {
+Future<void> createNotifierDatabaseTable(Database db) {
   return db.execute(
-    'CREATE TABLE todos(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING)',
+    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING)',
   );
 }

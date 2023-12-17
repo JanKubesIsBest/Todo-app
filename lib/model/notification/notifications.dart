@@ -48,8 +48,8 @@ class NotificationService {
     return await notificationsPlugin.pendingNotificationRequests();
   }
 
-  Future<void> showDailyAtTime() async {
+  Future<void> showDailyAtTime(int id) async {
     print("show daily");
-    notificationsPlugin.periodicallyShow(0, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
+    notificationsPlugin.periodicallyShow(id, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
   }
 }
