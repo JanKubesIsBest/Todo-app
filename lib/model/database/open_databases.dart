@@ -34,6 +34,7 @@ Future openNotifierDatabase() async {
 
 Future<void> createNotifierDatabaseTable(Database db) {
   return db.execute(
-    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING)',
+    // Reoccurring is INT because there is no native way of making bool in SQL
+    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING, recurring INT)',
   );
 }

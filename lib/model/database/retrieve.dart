@@ -13,3 +13,15 @@ Future<List<Map<String, dynamic>>> retrieveTodos() async {
   return maps;
 }
 
+Future<List<Map<String, dynamic>>> retrieveNotifications() async {
+  final database = await openDatabase(
+    join(await getDatabasesPath(), 'notifications.db'),
+    onCreate: (db, version) {
+      return createTodoTable(db);
+    },
+    version: 1,
+  );
+  final List<Map<String, dynamic>> maps = await database.query('notifications');
+  return maps;
+}
+

@@ -149,6 +149,7 @@ class _MyHomePageState extends State<InitialPage>
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: CustomPaint(

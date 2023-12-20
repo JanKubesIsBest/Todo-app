@@ -39,12 +39,7 @@ class _HomePageState extends State<HomePage> {
     tz.initializeTimeZones();
 
     WidgetsFlutterBinding.ensureInitialized();
-    askForPermissions();
-
-    getName();
-    getDefaultNotifyingTime();
-
-    checkIfTheNotifyingIsSet();
+    asynchronusStartFunctions();
   }
 
   @override
@@ -55,6 +50,17 @@ class _HomePageState extends State<HomePage> {
     newTodoDescriptionController.dispose();
 
     super.dispose();
+  }
+
+  void asynchronusStartFunctions() async {
+    askForPermissions();
+
+    getName();
+    getDefaultNotifyingTime();
+
+    checkIfTheNotifyingIsSet();
+
+    print(await retrieveNotifications());
   }
 
   void getName() async {
@@ -74,12 +80,12 @@ class _HomePageState extends State<HomePage> {
       print(startNotifyingAt);
       if (startNotifyingAt.difference(DateTime.now()).inDays < 0) {
         // I plan to return id of the notifier
-        int id = await addNewNotifier(startNotifyingAt);
+        int id = await addNewNotifier(startNotifyingAt, 1);
         Timer(startNotifyingAt.add(const Duration(days: 1)).difference(DateTime.now()), () {
           NotificationService().showDailyAtTime(id);
         });
       } else {
-        int id = await addNewNotifier(startNotifyingAt);
+        int id = await addNewNotifier(startNotifyingAt, 1);
         Timer(startNotifyingAt.difference(DateTime.now()), () {
           NotificationService().showDailyAtTime(id);
         });
