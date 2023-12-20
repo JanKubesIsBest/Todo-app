@@ -6,13 +6,14 @@ import '../todo/Todo.dart';
 
 void addNewTodoToDatabase(Todo todo) async {
   WidgetsFlutterBinding.ensureInitialized();
-  final database = await openTodoDatabase();
+  final database = await openOurDatabase();
 
   _insertTodo(database, todo);
 }
 
 // Define a function that inserts dogs into the database
 Future<void> _insertTodo(database, Todo todo) async {
+  print("inserting todo");
   // Get a reference to the database.
   var db = await database;
   await db.insert(
@@ -22,15 +23,19 @@ Future<void> _insertTodo(database, Todo todo) async {
   );
 }
 
-Future<int> addNewNotifier( DateTime date, bool recurring) async{
+Future<int> addNewNotifier( DateTime date, bool recurring) async {
   WidgetsFlutterBinding.ensureInitialized();
-  final database = await openNotifierDatabase();
+  final database = await openOurDatabase();
+  return _insertNotification(database, date, recurring);
+}
+Future<int> _insertNotification(database, DateTime date, bool recurring)async {
+  var db = await database;
 
-  database.insert(
+  await db.insert(
     'notifications',
     {'day': date.day.toString(), 'month': date.month.toString(), 'year': date.year.toString(), 'hour': date.hour.toString(), 'minute':date.minute.toString(), 'recurring': recurring ? '1' : '0'},
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
-  // TODO: Make it so it actually rereturns id of notification
+  // TODO: Make it so it actually returns id of notification
   return 0;
 }

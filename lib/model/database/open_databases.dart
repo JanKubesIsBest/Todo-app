@@ -1,12 +1,13 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-Future openTodoDatabase() async {
+Future openOurDatabase() async {
   final database = await openDatabase(
-    // TODO: Make a different name for to_do_test.db
-    join(await getDatabasesPath(), 'to_do_test.db'),
+    join(await getDatabasesPath(), 'newDatabase.db'),
     onCreate: (db, version) {
-      return createTodoTable(db);
+      print("Creating tables");
+      createNotifierDatabaseTable(db);
+      createTodoTable(db);
     },
     version: 1,
   );
@@ -20,21 +21,10 @@ Future<void> createTodoTable(Database db) {
   );
 }
 
-Future openNotifierDatabase() async {
-  final database = await openDatabase(
-    join(await getDatabasesPath(), 'notifications.db'),
-    onCreate: (db, version) {
-      return createNotifierDatabaseTable(db);
-    },
-    version: 1,
-  );
-
-  return database;
-}
-
 Future<void> createNotifierDatabaseTable(Database db) {
+  print("Notif. database build.");
+  // Reoccurring is INT because there is no native way of making bool in SQL
   return db.execute(
-    // Reoccurring is INT because there is no native way of making bool in SQL
-    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING, recurring INT)',
+    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING, recurring STRING)',
   );
 }

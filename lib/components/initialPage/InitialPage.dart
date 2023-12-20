@@ -235,7 +235,7 @@ class _MyHomePageState extends State<InitialPage>
                   height: 10,
                 ),
                 Opacity(
-                  opacity: buttonAnimationOpacity.value,
+                  opacity: 1,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,

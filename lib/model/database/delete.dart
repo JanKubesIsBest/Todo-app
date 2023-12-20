@@ -2,7 +2,7 @@ import "package:unfuckyourlife/model/database/open_databases.dart";
 
 Future<void> deleteTodo(int id) async {
   // Get a reference to the database.
-  final db = await openTodoDatabase();
+  final db = await openOurDatabase();
 
   // Remove the Dog from the database.
   await db.delete(

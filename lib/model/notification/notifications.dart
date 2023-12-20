@@ -1,6 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../database/insert_and_create.dart';
+
 class NotificationService {
   final FlutterLocalNotificationsPlugin notificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -35,6 +37,7 @@ class NotificationService {
       String? body,
       String? payLoad,
       required DateTime scheduledNotificationDateTime}) async {
+    int id = await addNewNotifier(scheduledNotificationDateTime, false);
     return notificationsPlugin.zonedSchedule(
         id,
         title,
@@ -48,8 +51,9 @@ class NotificationService {
     return await notificationsPlugin.pendingNotificationRequests();
   }
 
-  Future<void> showDailyAtTime(int id) async {
+  Future<void> showDailyAtTime(DateTime startNotifyingAt) async {
     print("show daily");
+    int id = await addNewNotifier(startNotifyingAt, true);
     notificationsPlugin.periodicallyShow(id, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
   }
 }
