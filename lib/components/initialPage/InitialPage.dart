@@ -222,9 +222,9 @@ class _MyHomePageState extends State<InitialPage>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
                   ),
-                  // TODO: Add something along these lines: "Default time should be time when you have free hours (after work, after school)"
+                  // TODO: Write down how you want this initial page to work."
                   child: Text(
-                    'When do you want to be notified: ${defaultTimeForNotifying.format(context)}',
+                    'Default notifying time: ${defaultTimeForNotifying.format(context)}',
                     style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w100,

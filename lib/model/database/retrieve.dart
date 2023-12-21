@@ -11,3 +11,8 @@ Future<List<Map<String, dynamic>>> retrieveNotifications() async {
   return maps;
 }
 
+Future<List<Map<String, dynamic>>> retrieveNotificationsById(int id) async {
+  final db = await openOurDatabase();
+  final maps = await db.query('notifications', where: 'id = ?', whereArgs: [id]);
+  return maps;
+}

@@ -31,14 +31,14 @@ class NotificationService {
         iOS: DarwinNotificationDetails());
   }
 
-  Future scheduleNotification(
+  Future<int> scheduleNotification(
       {int id = 0,
       String? title,
       String? body,
       String? payLoad,
       required DateTime scheduledNotificationDateTime}) async {
     int id = await addNewNotifier(scheduledNotificationDateTime, false);
-    return notificationsPlugin.zonedSchedule(
+    notificationsPlugin.zonedSchedule(
         id,
         title,
         body,
@@ -46,6 +46,8 @@ class NotificationService {
         await notificationDetails(),
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime);
+    // Return the id so you can then connect it with the todos database --> look into docs
+    return id;
   }
   Future<List<PendingNotificationRequest>> getActiveNotifications() async {
     return await notificationsPlugin.pendingNotificationRequests();

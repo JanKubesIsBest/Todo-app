@@ -31,11 +31,9 @@ Future<int> addNewNotifier( DateTime date, bool recurring) async {
 Future<int> _insertNotification(database, DateTime date, bool recurring)async {
   var db = await database;
 
-  await db.insert(
+  return await db.insert(
     'notifications',
     {'day': date.day.toString(), 'month': date.month.toString(), 'year': date.year.toString(), 'hour': date.hour.toString(), 'minute':date.minute.toString(), 'recurring': recurring ? '1' : '0'},
-    conflictAlgorithm: ConflictAlgorithm.replace,
+    conflictAlgorithm: ConflictAlgorithm.ignore,
   );
-  // TODO: Make it so it actually returns id of notification
-  return 0;
 }

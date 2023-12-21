@@ -1,10 +1,12 @@
+import 'package:unfuckyourlife/model/database/retrieve.dart';
+
 class Todo {
   // Id is assigned automatically
   final int? id;
   final String name;
   final String description;
   final DateTime created;
-  final DateTime deadline;
+  final int deadline;
 
   // TODO: Add time created, deadline.
   // Id is not required, bcs we don't even use it when building components.
@@ -22,7 +24,7 @@ class Todo {
       'description': description,
       // Needs to be done, bcs SQL does not know DateTime
       'created': created.toIso8601String(),
-      'deadline': deadline.toIso8601String(),
+      'deadline': deadline,
     };
   }
 
@@ -30,5 +32,19 @@ class Todo {
   @override
   String toString() {
     return 'Todo{todo_name: $name, description: $description, deadline: $deadline, created: $created}';
+  }
+
+  Future<DateTime> getDeadline() async {
+    List<Map<String, dynamic>> mapedNotifList = await retrieveNotificationsById(deadline);
+    
+    if (mapedNotifList.isNotEmpty) {
+      Map<String, dynamic> mapedNotif = mapedNotifList[0];
+      return DateTime(mapedNotif['year'], mapedNotif['month'], mapedNotif['day'], mapedNotif['hour'], mapedNotif['minute']);
+    }
+    else {
+      // should not happen
+      print("!!!!!!!!!!!!!! Notifier was not found.");
+      return DateTime.now();
+    }
   }
 }

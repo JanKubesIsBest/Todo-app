@@ -75,12 +75,20 @@ class _HomePageState extends State<HomePage> {
   void checkIfTheNotifyingIsSet() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("notifying") != true) {
-      DateTime startNotifyingAt = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 17, 45,);
+      DateTime startNotifyingAt = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        17,
+        45,
+      );
 
-      print(startNotifyingAt);
       if (startNotifyingAt.difference(DateTime.now()).inDays < 0) {
         // I plan to return id of the notifier
-        Timer(startNotifyingAt.add(const Duration(days: 1)).difference(DateTime.now()), () {
+        Timer(
+            startNotifyingAt
+                .add(const Duration(days: 1))
+                .difference(DateTime.now()), () {
           NotificationService().showDailyAtTime(startNotifyingAt);
         });
       } else {
@@ -122,16 +130,12 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.w100),
                   ),
                   FutureBuilder(
-                    future: retrieveTodos(),
+                    future: retrieveTodosAndSortThem(),
                     builder: (BuildContext context,
-                        AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                        AsyncSnapshot<List<Widget>> snapshot) {
                       if (snapshot.hasData) {
-                        if (snapshot.data!.isEmpty) {
-                          _todos = [];
-                          return const Text("Gay");
-                        }
-                        retrieveTodosSorted(snapshot.data!);
-                        List<Widget> widgets = todosWidgets(_todos);
+                        List<Widget> widgets = snapshot.data as List<Widget>;
+
                         return ListView.builder(
                           shrinkWrap: true,
                           itemCount: widgets.length,
@@ -193,7 +197,6 @@ class _HomePageState extends State<HomePage> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
-
             Future<void> selectDate(BuildContext context) async {
               final DateTime? picked = await showDatePicker(
                   context: context,
@@ -206,7 +209,6 @@ class _HomePageState extends State<HomePage> {
                 });
               }
             }
-
 
             Future<void> selectTime(BuildContext context) async {
               final TimeOfDay? pickedS = await showTimePicker(
@@ -272,8 +274,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       ElevatedButton(
                         onPressed: () => selectTime(context),
-                        child: Text(
-                            notifyAt.format(context)),
+                        child: Text(notifyAt.format(context)),
                       ),
                     ],
                   ),
@@ -288,21 +289,32 @@ class _HomePageState extends State<HomePage> {
                   TextButton(
                     child: const Text('Add'),
                     onPressed: () async {
+                      // If the notification notifying time will be different from the time that all notifications are
+                      // are reminded ("Check all your tasks" after school day or something like that), add the notification time.
+
+                      // The default notifying time will always be 1
+                      int deadline_id = 1;
+
+                      if (notifyAt != defaultNotifyingTime) {
+                        DateTime date = DateTime(
+                            selectedDateForDeadline.year,
+                            selectedDateForDeadline.month,
+                            selectedDateForDeadline.day,
+                            notifyAt.hour,
+                            notifyAt.minute);
+                        deadline_id = await NotificationService()
+                            .scheduleNotification(
+                                scheduledNotificationDateTime: date);
+                      }
+
                       final newTodo = Todo(
                         name: newTodoNameController.value.text,
                         description: newTodoDescriptionController.value.text,
                         created: DateTime.now(),
-                        deadline: selectedDateForDeadline,
+                        deadline: deadline_id,
                       );
                       addNewTodoToDatabase(newTodo);
                       uiUpdateTodos();
-
-                      // If the notification notifying time will be different from the time that all notifications are
-                      // are reminded ("Check all your tasks" after school day or something like that), add the notification time.
-                      if (notifyAt != defaultNotifyingTime){
-                        DateTime date = DateTime(selectedDateForDeadline.year, selectedDateForDeadline.month, selectedDateForDeadline.day, notifyAt.hour, notifyAt.minute);
-                        NotificationService().scheduleNotification(scheduledNotificationDateTime: date);
-                      }
 
                       Navigator.of(context).pop();
                     },
@@ -342,7 +354,9 @@ class _HomePageState extends State<HomePage> {
     if (timeInString != null) {
       // timeInString.split("/") => [hours, minutes
       setState(() {
-        defaultNotifyingTime = TimeOfDay(hour: int.parse(timeInString.split("/")[0]), minute: int.parse(timeInString.split("/")[0]));
+        defaultNotifyingTime = TimeOfDay(
+            hour: int.parse(timeInString.split("/")[0]),
+            minute: int.parse(timeInString.split("/")[0]));
         notifyAt = defaultNotifyingTime;
       });
     }
@@ -353,7 +367,18 @@ class _HomePageState extends State<HomePage> {
     print(await NotificationService().getActiveNotifications());
   }
 
-  void retrieveTodosSorted(List<Map<String, dynamic>> map) {
+  Future<List<Widget>> retrieveTodosAndSortThem() async {
+    List<Map<String, dynamic>> todos = await retrieveTodos();
+
+    if (todos.isEmpty) {
+      _todos = [];
+      return [const Text("Gay")];
+    }
+    await retrieveTodosSorted(todos);
+    return await todosWidgets(_todos);
+  }
+
+  Future<void> retrieveTodosSorted(List<Map<String, dynamic>> map) async {
     _todos = [];
     for (var i = 0; i < map.length; i++) {
       _todos.add(mapToTodo(map[i]));
@@ -363,10 +388,15 @@ class _HomePageState extends State<HomePage> {
       while (runAgain) {
         runAgain = false;
         for (var i = 1; i < _todos.length; i++) {
-          int dayX = _todos[i].deadline.millisecondsSinceEpoch;
-          int dayY = _todos[i - 1].deadline.millisecondsSinceEpoch;
+          DateTime deadlineOne = await _todos[i].getDeadline();
+          DateTime deadlineTwo = await _todos[i - 1].getDeadline();
+
+          int dayX = deadlineOne.millisecondsSinceEpoch;
+          int dayY = deadlineTwo.millisecondsSinceEpoch;
 
           if (dayX.compareTo(dayY) < 0) {
+            print(_todos);
+
             _todos.insert(i - 1, _todos[i]);
             _todos.removeAt(i + 1);
             runAgain = true;
@@ -376,7 +406,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  List<Widget> todosWidgets(List<Todo> todoList) {
+  Future<List<Widget>> todosWidgets(List<Todo> todoList) async {
     List<Widget> widgets = [];
 
     bool isToday = false;
@@ -384,14 +414,19 @@ class _HomePageState extends State<HomePage> {
     bool addedToday = false;
     bool addedOther = false;
 
-    for (int i = 0; i<todoList.length; i++) {
-      if (todoList[i].deadline.year == DateTime.now().year && todoList[i].deadline.day == DateTime.now().day && todoList[i].deadline.month == DateTime.now().month){
+    print(todoList);
+
+    for (int i = 0; i < todoList.length; i++) {
+      DateTime deadline = await todoList[i].getDeadline();
+      if (deadline.year == DateTime.now().year &&
+          deadline.day == DateTime.now().day &&
+          deadline.month == DateTime.now().month) {
         isToday = true;
       } else {
         isToday = false;
       }
 
-      if (isToday && !addedToday){
+      if (isToday && !addedToday) {
         widgets.add(const Text("Today"));
         widgets.add(const Divider());
         addedToday = true;
@@ -402,7 +437,10 @@ class _HomePageState extends State<HomePage> {
         addedOther = true;
       }
 
-      widgets.add(TodoComponent(todo: todoList[i], placeInTheTodosList: i, removeTodoInUi: removeFromTodoList));
+      widgets.add(TodoComponent(
+          todo: todoList[i],
+          placeInTheTodosList: i,
+          removeTodoInUi: removeFromTodoList));
     }
     return widgets;
   }
