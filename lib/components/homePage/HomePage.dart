@@ -53,6 +53,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void asynchronusStartFunctions() async {
+    print(NotificationService().getActiveNotifications());
+
     askForPermissions();
 
     getName();

@@ -28,9 +28,9 @@ class TodoComponent extends StatelessWidget {
                     todo.name,
                     style: const TextStyle(fontSize: 20),
                   ),
-                  IconButton(onPressed: () => {
-                    deleteTodo(todo.id as int),
-                    removeTodoInUi(placeInTheTodosList),
+                  IconButton(onPressed: () async {
+                    await deleteTodo(todo);
+                    removeTodoInUi(placeInTheTodosList);
                   }, icon: const Icon(Icons.delete),),
                 ],
               ),

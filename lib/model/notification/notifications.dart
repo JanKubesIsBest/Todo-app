@@ -58,4 +58,8 @@ class NotificationService {
     int id = await addNewNotifier(startNotifyingAt, true);
     notificationsPlugin.periodicallyShow(id, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
   }
+
+  Future<void> cancelNotification(int id) async {
+    await notificationsPlugin.cancel(id);
+  }
 }
