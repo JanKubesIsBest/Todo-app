@@ -105,6 +105,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const Drawer(
+        child: Text("TEXT"),
+      ),
       body: Stack(
         children: [
           Padding(
