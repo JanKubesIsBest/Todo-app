@@ -222,7 +222,6 @@ class _MyHomePageState extends State<InitialPage>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
                   ),
-                  // TODO: Write down how you want this initial page to work."
                   child: Text(
                     'Default notifying time: ${defaultTimeForNotifying.format(context)}',
                     style: const TextStyle(

@@ -364,9 +364,6 @@ class _HomePageState extends State<HomePage> {
     }
     // Default
     defaultNotifyingTime = const TimeOfDay(hour: 12, minute: 0);
-
-    // TODO: remove
-    print(await NotificationService().getActiveNotifications());
   }
 
   Future<List<Widget>> retrieveTodosAndSortThem() async {

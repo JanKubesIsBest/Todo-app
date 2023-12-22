@@ -8,7 +8,6 @@ class Todo {
   final DateTime created;
   final int deadline;
 
-  // TODO: Add time created, deadline.
   // Id is not required, bcs we don't even use it when building components.
   const Todo({
     required this.created,
