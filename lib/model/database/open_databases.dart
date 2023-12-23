@@ -18,7 +18,7 @@ Future openOurDatabase() async {
 
 Future<void> createTodoTable(Database db) {
   return db.execute(
-    'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING, channel INT)',
+    'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING, channelId INT)',
   );
 }
 
