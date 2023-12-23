@@ -8,6 +8,7 @@ Future openOurDatabase() async {
       print("Creating tables");
       createNotifierDatabaseTable(db);
       createTodoTable(db);
+      createChannelDatabase(db);
     },
     version: 1,
   );
@@ -17,7 +18,7 @@ Future openOurDatabase() async {
 
 Future<void> createTodoTable(Database db) {
   return db.execute(
-    'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING, deadline STRING)',
+    'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING, channel INT)',
   );
 }
 
@@ -26,5 +27,13 @@ Future<void> createNotifierDatabaseTable(Database db) {
   // Reoccurring is INT because there is no native way of making bool in SQL
   return db.execute(
     'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING, recurring STRING)',
+  );
+}
+
+Future<void> createChannelDatabase(Database db) {
+  print("Channel database build.");
+  // Every custom tod+o has it's own channel column named deadline.
+  return db.execute(
+    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, name STRING, deadline INTEGER)',
   );
 }
