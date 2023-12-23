@@ -37,7 +37,8 @@ class NotificationService {
       String? body,
       String? payLoad,
       required DateTime scheduledNotificationDateTime}) async {
-    int id = await addNewNotifier(scheduledNotificationDateTime, false);
+    // Todo make work with channels
+    int id = await addNewNotifier(scheduledNotificationDateTime);
     notificationsPlugin.zonedSchedule(
         id,
         title,
@@ -55,7 +56,8 @@ class NotificationService {
 
   Future<void> showDailyAtTime(DateTime startNotifyingAt) async {
     print("show daily");
-    int id = await addNewNotifier(startNotifyingAt, true);
+    // TODO: make work with channels.
+    int id = await addNewNotifier(startNotifyingAt);
     notificationsPlugin.periodicallyShow(id, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
   }
 

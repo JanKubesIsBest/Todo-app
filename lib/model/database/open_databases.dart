@@ -26,7 +26,7 @@ Future<void> createNotifierDatabaseTable(Database db) {
   print("Notif. database build.");
   // Reoccurring is INT because there is no native way of making bool in SQL
   return db.execute(
-    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING, recurring STRING)',
+    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING)',
   );
 }
 
@@ -34,6 +34,6 @@ Future<void> createChannelDatabase(Database db) {
   print("Channel database build.");
   // Every custom tod+o has it's own channel column named deadline.
   return db.execute(
-    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, name STRING, deadline INTEGER)',
+    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, name STRING, deadline INTEGER, recurring INTEGER)',
   );
 }
