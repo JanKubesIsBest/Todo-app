@@ -2,8 +2,9 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 Future openOurDatabase() async {
+  print("open our database");
   final database = await openDatabase(
-    join(await getDatabasesPath(), 'newDatabase.db'),
+    join(await getDatabasesPath(), 'appDatabase.db'),
     onCreate: (db, version) {
       print("Creating tables");
       createNotifierDatabaseTable(db);
@@ -17,6 +18,7 @@ Future openOurDatabase() async {
 }
 
 Future<void> createTodoTable(Database db) {
+  print("Todos created");
   return db.execute(
     'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING, channelId INT)',
   );

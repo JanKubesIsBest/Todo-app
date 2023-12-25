@@ -5,9 +5,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
+import 'package:unfuckyourlife/model/database/open_databases.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 
+import '../../model/database/channelClass/channel.dart';
 import '../../model/database/insert_and_create.dart';
 import '../../model/database/retrieve.dart';
 import '../../model/notification/notifications.dart';
@@ -31,6 +33,8 @@ class _HomePageState extends State<HomePage> {
   late DateTime selectedDateForDeadline = getTomorrow();
   late TimeOfDay defaultNotifyingTime;
   late TimeOfDay notifyAt;
+
+  List<Channel> channels = [];
 
   @override
   void initState() {
@@ -61,9 +65,6 @@ class _HomePageState extends State<HomePage> {
     getDefaultNotifyingTime();
 
     checkIfTheNotifyingIsSet();
-
-    print(await retrieveChannels());
-    print(await retrieveNotifications());
   }
 
   void getName() async {
@@ -136,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.w100),
                   ),
                   FutureBuilder(
-                    future: retrieveTodosAndSortThem(),
+                    future: retrieveTodosAndSortThemAndRetrieveChannels(),
                     builder: (BuildContext context,
                         AsyncSnapshot<List<Widget>> snapshot) {
                       if (snapshot.hasData) {
@@ -273,6 +274,12 @@ class _HomePageState extends State<HomePage> {
                           controller: newTodoDescriptionController,
                         ),
                       ),
+                      DropdownButton<String>(items: channels.map<DropdownMenuItem<String>>((Channel value) {
+                        return DropdownMenuItem<String>(value: value.name,child: Text(value.name),);
+                      }).toList(), onChanged: (String? value) {
+
+                      }, // TODO: Make a custom that would be first in the list.
+                      ),
                       ElevatedButton(
                         onPressed: () => selectDate(context),
                         child: Text(
@@ -299,7 +306,7 @@ class _HomePageState extends State<HomePage> {
                       // are reminded ("Check all your tasks" after school day or something like that), add the notification time.
 
                       // The default notifying time will always be 1
-                      int deadline_id = 1;
+                      int deadlineId = 1;
 
                       if (notifyAt != defaultNotifyingTime) {
                         DateTime date = DateTime(
@@ -308,7 +315,7 @@ class _HomePageState extends State<HomePage> {
                             selectedDateForDeadline.day,
                             notifyAt.hour,
                             notifyAt.minute);
-                        deadline_id = await NotificationService()
+                        deadlineId = await NotificationService()
                             .scheduleNotification(
                                 scheduledNotificationDateTime: date);
                       }
@@ -317,7 +324,7 @@ class _HomePageState extends State<HomePage> {
                         name: newTodoNameController.value.text,
                         description: newTodoDescriptionController.value.text,
                         created: DateTime.now(),
-                        deadline: deadline_id,
+                        deadline: deadlineId,
                       );
                       addNewTodoToDatabase(newTodo);
                       uiUpdateTodos();
@@ -370,7 +377,16 @@ class _HomePageState extends State<HomePage> {
     defaultNotifyingTime = const TimeOfDay(hour: 12, minute: 0);
   }
 
-  Future<List<Widget>> retrieveTodosAndSortThem() async {
+  Future<List<Widget>> retrieveTodosAndSortThemAndRetrieveChannels() async {
+    print("Retriving");
+    // Channels:
+    List<Map<String, dynamic>> channelsMap = await retrieveChannels();
+    channels = [];
+    for (final Map<String, dynamic> map in channelsMap) {
+      channels.add(Channel(map['id'], map['name'], map['deadline'], map['recurring'] == 1 ? true : false));
+      }
+    // Todos:
+    print("Working on todos");
     List<Map<String, dynamic>> todos = await retrieveTodos();
 
     if (todos.isEmpty) {
