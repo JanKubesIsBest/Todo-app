@@ -50,7 +50,7 @@ Future<int> _insertChannel(database, String name, bool recurring, DateTime date)
   int databaseId = await addNewNotifier(date);
 
   return await db.insert(
-    'notifications',
+    'channels',
     {'name': name, 'deadline': databaseId, 'recurring': recurring ? 1 : 0},
     conflictAlgorithm: ConflictAlgorithm.ignore,
   );

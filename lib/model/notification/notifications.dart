@@ -57,7 +57,7 @@ class NotificationService {
   Future<void> showDailyAtTime(DateTime startNotifyingAt) async {
     print("show daily");
     // TODO: make work with channels.
-    int id = await addNewNotifier(startNotifyingAt);
+    int id = await addNewChannel("Default", startNotifyingAt, true);
     notificationsPlugin.periodicallyShow(id, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
   }
 

@@ -34,6 +34,6 @@ Future<void> createChannelDatabase(Database db) {
   print("Channel database build.");
   // Every custom tod+o has it's own channel column named deadline.
   return db.execute(
-    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, name STRING, deadline INTEGER, recurring INTEGER)',
+    'CREATE TABLE channels(id INTEGER PRIMARY KEY, name STRING, deadline INTEGER, recurring INTEGER)',
   );
 }
