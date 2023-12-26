@@ -34,7 +34,9 @@ class _HomePageState extends State<HomePage> {
   late TimeOfDay defaultNotifyingTime;
   late TimeOfDay notifyAt;
 
-  List<Channel> channels = [];
+  List<Channel> channels = [Channel(0, "Custom", 0, true)];
+
+  Channel selectedChannel = Channel(0, "Custom", 0, true);
 
   @override
   void initState() {
@@ -65,6 +67,16 @@ class _HomePageState extends State<HomePage> {
     getDefaultNotifyingTime();
 
     checkIfTheNotifyingIsSet();
+
+    var y = await retrieveChannels();
+    var x = await retrieveTodos();
+    var z = await retrieveDeadlines();
+    var i = await retrieveNotifications();
+
+    print("Channels: ${y}");
+    print("Todos: ${x}");
+    print("deadlines:  ${z}");
+    print("notifications:  ${i}");
   }
 
   void getName() async {
@@ -77,6 +89,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void checkIfTheNotifyingIsSet() async {
+    // TODO: Reformat this weird shit
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("notifying") != true) {
       DateTime startNotifyingAt = DateTime(
@@ -87,17 +100,22 @@ class _HomePageState extends State<HomePage> {
         45,
       );
 
+      // The only thing that is needed is name and is custom, so does not matter much
+      Channel customChannel = Channel(0, "Custom", 0, false);
+
       if (startNotifyingAt.difference(DateTime.now()).inDays < 0) {
         // I plan to return id of the notifier
         Timer(
             startNotifyingAt
                 .add(const Duration(days: 1))
                 .difference(DateTime.now()), () {
-          NotificationService().showDailyAtTime(startNotifyingAt);
+          NotificationService()
+              .showDailyAtTime(customChannel, startNotifyingAt);
         });
       } else {
         Timer(startNotifyingAt.difference(DateTime.now()), () {
-          NotificationService().showDailyAtTime(startNotifyingAt);
+          NotificationService()
+              .showDailyAtTime(customChannel, startNotifyingAt);
         });
       }
       prefs.setBool("notifying", true);
@@ -274,11 +292,21 @@ class _HomePageState extends State<HomePage> {
                           controller: newTodoDescriptionController,
                         ),
                       ),
-                      DropdownButton<String>(items: channels.map<DropdownMenuItem<String>>((Channel value) {
-                        return DropdownMenuItem<String>(value: value.name,child: Text(value.name),);
-                      }).toList(), onChanged: (String? value) {
-
-                      }, // TODO: Make a custom that would be first in the list.
+                      DropdownMenu(
+                        dropdownMenuEntries: channels
+                            .map((Channel e) => DropdownMenuEntry(
+                                  value: e,
+                                  label: e.name,
+                                ))
+                            .toList(),
+                        initialSelection: channels.firstOrNull,
+                        onSelected: (Channel? _selectedChannel) {
+                          setState(() {
+                            if (_selectedChannel != null) {
+                              selectedChannel = _selectedChannel;
+                            }
+                          });
+                        },
                       ),
                       ElevatedButton(
                         onPressed: () => selectDate(context),
@@ -305,26 +333,38 @@ class _HomePageState extends State<HomePage> {
                       // If the notification notifying time will be different from the time that all notifications are
                       // are reminded ("Check all your tasks" after school day or something like that), add the notification time.
 
-                      // The default notifying time will always be 1
-                      int deadlineId = 1;
-
-                      if (notifyAt != defaultNotifyingTime) {
+                      // Add new channel or connected to already created one
+                      // If the the custom option is selected, you always make new channels that have custom attributes
+                      int channelId = selectedChannel.id;
+                      if (selectedChannel.isCustom == true) {
                         DateTime date = DateTime(
-                            selectedDateForDeadline.year,
-                            selectedDateForDeadline.month,
-                            selectedDateForDeadline.day,
-                            notifyAt.hour,
-                            notifyAt.minute);
-                        deadlineId = await NotificationService()
+                          selectedDateForDeadline.year,
+                          selectedDateForDeadline.month,
+                          selectedDateForDeadline.day,
+                          notifyAt.hour,
+                          notifyAt.minute,
+                        );
+                        channelId = await NotificationService()
                             .scheduleNotification(
-                                scheduledNotificationDateTime: date);
+                                scheduledNotificationDateTime: date,
+                                channel: selectedChannel);
                       }
+
+                      // add new deadline
+                      int deadlineId = await addNewDeadline(
+                        DateTime(
+                          selectedDateForDeadline.year,
+                          selectedDateForDeadline.month,
+                          selectedDateForDeadline.day,
+                        ),
+                      );
 
                       final newTodo = Todo(
                         name: newTodoNameController.value.text,
                         description: newTodoDescriptionController.value.text,
                         created: DateTime.now(),
                         deadline: deadlineId,
+                        channel: channelId,
                       );
                       addNewTodoToDatabase(newTodo);
                       uiUpdateTodos();
@@ -381,10 +421,12 @@ class _HomePageState extends State<HomePage> {
     print("Retriving");
     // Channels:
     List<Map<String, dynamic>> channelsMap = await retrieveChannels();
-    channels = [];
+    channels = [Channel(0, "Custom", 0, true)];
     for (final Map<String, dynamic> map in channelsMap) {
-      channels.add(Channel(map['id'], map['name'], map['deadline'], map['recurring'] == 1 ? true : false));
-      }
+      channels.add(Channel(map['id'], map['name'], map['notifier'],
+          map['isCustom'] == 1 ? true : false));
+    }
+
     // Todos:
     print("Working on todos");
     List<Map<String, dynamic>> todos = await retrieveTodos();

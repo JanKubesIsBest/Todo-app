@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../database/channelClass/channel.dart';
 import '../database/insert_and_create.dart';
 
 class NotificationService {
@@ -36,9 +37,10 @@ class NotificationService {
       String? title,
       String? body,
       String? payLoad,
-      required DateTime scheduledNotificationDateTime}) async {
+      required DateTime scheduledNotificationDateTime, required Channel channel}) async {
+
     // Todo make work with channels
-    int id = await addNewNotifier(scheduledNotificationDateTime);
+    int id = await addNewChannel(channel, scheduledNotificationDateTime);
     notificationsPlugin.zonedSchedule(
         id,
         title,
@@ -54,10 +56,10 @@ class NotificationService {
     return await notificationsPlugin.pendingNotificationRequests();
   }
 
-  Future<void> showDailyAtTime(DateTime startNotifyingAt) async {
+  Future<void> showDailyAtTime(Channel channel, DateTime startNotifyingAt) async {
     print("show daily");
     // TODO: make work with channels.
-    int id = await addNewChannel("Default", startNotifyingAt, true);
+    int id = await addNewChannel(channel, startNotifyingAt,);
     notificationsPlugin.periodicallyShow(id, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
   }
 

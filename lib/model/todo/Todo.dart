@@ -7,9 +7,11 @@ class Todo {
   final String description;
   final DateTime created;
   final int deadline;
+  final int channel;
 
   // Id is not required, bcs we don't even use it when building components.
   const Todo({
+    required this.channel,
     required this.created,
     required this.name,
     required this.description,
@@ -23,14 +25,15 @@ class Todo {
       'description': description,
       // Needs to be done, bcs SQL does not know DateTime
       'created': created.toIso8601String(),
-      'deadline': deadline,
+      'deadlineId': deadline,
+      'channelId': channel,
     };
   }
 
   // Will be useful when printing
   @override
   String toString() {
-    return 'Todo{todo_name: $name, description: $description, deadline: $deadline, created: $created}';
+    return 'Todo{todo_name: $name, description: $description, deadline: $deadline, created: $created, channel: $channel}';
   }
 
   Future<DateTime> getDeadline() async {

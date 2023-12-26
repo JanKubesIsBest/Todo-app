@@ -23,3 +23,15 @@ Future<List<Map<String, dynamic>>> retrieveChannels() async {
   final List<Map<String, dynamic>> maps = await database.query('channels');
   return maps;
 }
+
+Future<List<Map<String, dynamic>>> retrieveChannelById(int id) async {
+  final database = await openOurDatabase();
+  final List<Map<String, dynamic>> maps = await database.query('channels', where: 'id = ?', whereArgs: [id]);
+  return maps;
+}
+
+Future<List<Map<String, dynamic>>> retrieveDeadlines() async {
+  final database = await openOurDatabase();
+  final List<Map<String, dynamic>> maps = await database.query('deadlines');
+  return maps;
+}

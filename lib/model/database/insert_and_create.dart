@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
 
 import '../todo/Todo.dart';
+import 'channelClass/channel.dart';
 
 void addNewTodoToDatabase(Todo todo) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,20 +39,35 @@ Future<int> _insertNotification(database, DateTime date,)async {
   );
 }
 
-Future<int> addNewChannel(String name, DateTime date, bool recurring) async {
+Future<int> addNewChannel(Channel channel, DateTime date,) async {
   WidgetsFlutterBinding.ensureInitialized();
   final database = await openOurDatabase();
   // Todo: check if the channel already exists, then you don't have to make one and just return the id of it.
-  return _insertChannel(database, name, recurring, date);
+  return _insertChannel(database, channel, date);
 }
-Future<int> _insertChannel(database, String name, bool recurring, DateTime date) async {
+Future<int> _insertChannel(database, Channel channel, DateTime date) async {
   var db = await database;
 
   int databaseId = await addNewNotifier(date);
 
   return await db.insert(
     'channels',
-    {'name': name, 'deadline': databaseId, 'recurring': recurring ? 1 : 0},
+    {'name': channel.name, 'notifier': databaseId, 'isCustom': channel.isCustom ? 1 : 0},
+    conflictAlgorithm: ConflictAlgorithm.ignore,
+  );
+}
+
+Future<int> addNewDeadline( DateTime date) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final database = await openOurDatabase();
+  return _insertNewDeadline(database, date,);
+}
+Future<int> _insertNewDeadline(database, DateTime date,)async {
+  var db = await database;
+
+  return await db.insert(
+    'deadlines',
+    {'day': date.day.toString(), 'month': date.month.toString(), 'year': date.year.toString(),},
     conflictAlgorithm: ConflictAlgorithm.ignore,
   );
 }
