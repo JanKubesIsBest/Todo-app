@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
     askForPermissions();
 
     getName();
-    getDefaultNotifyingTime();
+    await getDefaultNotifyingTime();
 
     checkIfTheNotifyingIsSet();
 
@@ -89,33 +89,48 @@ class _HomePageState extends State<HomePage> {
   }
 
   void checkIfTheNotifyingIsSet() async {
-    // TODO: Reformat this weird shit
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("notifying") != true) {
       DateTime startNotifyingAt = DateTime(
         DateTime.now().year,
         DateTime.now().month,
         DateTime.now().day,
-        17,
-        45,
+        defaultNotifyingTime.hour,
+        defaultNotifyingTime.minute,
       );
 
       // The only thing that is needed is name and is custom, so does not matter much
-      Channel customChannel = Channel(0, "Custom", 0, false);
+      Channel defaultChannel = Channel(0, "Default", 0, false);
 
-      if (startNotifyingAt.difference(DateTime.now()).inDays < 0) {
-        // I plan to return id of the notifier
+      // now 17 default 18 -1
+      // now - default
+      print(DateTime.now()
+          .difference(startNotifyingAt).inSeconds);
+
+      // default - now
+      print(startNotifyingAt
+          .difference(DateTime.now()).inSeconds);
+
+      // TODO: Add the channel list is not updating, so make it updateable.
+      if (DateTime.now()
+          .difference(startNotifyingAt).inSeconds < 0) {
         Timer(
             startNotifyingAt
-                .add(const Duration(days: 1))
                 .difference(DateTime.now()), () {
+              NotificationService().showNotificationNow(defaultChannel);
           NotificationService()
-              .showDailyAtTime(customChannel, startNotifyingAt);
+              .showDailyAtTime(defaultChannel, startNotifyingAt);
         });
       } else {
-        Timer(startNotifyingAt.difference(DateTime.now()), () {
+        // day - time between now and start notifying time.
+        // Example: it is 17, default time is 15. 15 - 17 = -2h
+        // -2 + 24 = 22
+        // 22 h after 17 is 15
+        Duration x = startNotifyingAt.difference(DateTime.now());
+        Duration y = Duration(seconds: x.inSeconds + 60*60*24);
+        Timer(y, () {
           NotificationService()
-              .showDailyAtTime(customChannel, startNotifyingAt);
+              .showDailyAtTime(defaultChannel, startNotifyingAt);
         });
       }
       prefs.setBool("notifying", true);
@@ -400,21 +415,24 @@ class _HomePageState extends State<HomePage> {
         DateTime.now().year, DateTime.now().month, DateTime.now().day + 1);
   }
 
-  void getDefaultNotifyingTime() async {
+  Future<void> getDefaultNotifyingTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? timeInString = prefs.getString("defaultNotifyingTime");
+    print(timeInString);
     // Should never happen
     if (timeInString != null) {
+      print("Setting notifying at");
       // timeInString.split("/") => [hours, minutes
       setState(() {
         defaultNotifyingTime = TimeOfDay(
             hour: int.parse(timeInString.split("/")[0]),
-            minute: int.parse(timeInString.split("/")[0]));
+            minute: int.parse(timeInString.split("/")[1]));
         notifyAt = defaultNotifyingTime;
       });
+    } else {
+      // Default
+      defaultNotifyingTime = const TimeOfDay(hour: 12, minute: 0);
     }
-    // Default
-    defaultNotifyingTime = const TimeOfDay(hour: 12, minute: 0);
   }
 
   Future<List<Widget>> retrieveTodosAndSortThemAndRetrieveChannels() async {
@@ -423,8 +441,12 @@ class _HomePageState extends State<HomePage> {
     List<Map<String, dynamic>> channelsMap = await retrieveChannels();
     channels = [Channel(0, "Custom", 0, true)];
     for (final Map<String, dynamic> map in channelsMap) {
-      channels.add(Channel(map['id'], map['name'], map['notifier'],
-          map['isCustom'] == 1 ? true : false));
+
+      // If the channel is custom, don't add it as every custom channel is special.
+      if (map['isCustom'] != 1) {
+        channels.add(Channel(map['id'], map['name'], map['notifier'],
+            false));
+      }
     }
 
     // Todos:
@@ -456,8 +478,6 @@ class _HomePageState extends State<HomePage> {
           int dayY = deadlineTwo.millisecondsSinceEpoch;
 
           if (dayX.compareTo(dayY) < 0) {
-            print(_todos);
-
             _todos.insert(i - 1, _todos[i]);
             _todos.removeAt(i + 1);
             runAgain = true;

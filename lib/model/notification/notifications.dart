@@ -60,10 +60,22 @@ class NotificationService {
     print("show daily");
     // TODO: make work with channels.
     int id = await addNewChannel(channel, startNotifyingAt,);
-    notificationsPlugin.periodicallyShow(id, "Repeat", "Repeat", RepeatInterval.daily, await notificationDetails());
+    notificationsPlugin.periodicallyShow(id, channel.name, "Repeat", RepeatInterval.daily, await notificationDetails());
   }
 
   Future<void> cancelNotification(int id) async {
     await notificationsPlugin.cancel(id);
+  }
+
+  void showNotificationNow(Channel channel) async {
+    await notificationsPlugin.zonedSchedule(
+        0,
+        channel.name,
+        'scheduled body',
+        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+        await notificationDetails(),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime);
   }
 }
