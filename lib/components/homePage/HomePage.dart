@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
-import 'package:unfuckyourlife/model/database/open_databases.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 

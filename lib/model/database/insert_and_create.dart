@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
+import 'package:unfuckyourlife/model/database/retrieve.dart';
 
 import '../todo/Todo.dart';
 import 'channelClass/channel.dart';
@@ -43,6 +44,16 @@ Future<int> addNewChannel(Channel channel, DateTime date,) async {
   WidgetsFlutterBinding.ensureInitialized();
   final database = await openOurDatabase();
   // Todo: check if the channel already exists, then you don't have to make one and just return the id of it.
+
+  if (await checkIfTheChannelAlreadyExists(channel)) {
+    print("Channel already exists");
+  
+    final List<Map<String, dynamic>> channelListMap = await retrieveChannelByName(channel.name);
+
+    return channelListMap[0]["name"];
+  }
+
+  print("Channel does not exist");
   return _insertChannel(database, channel, date);
 }
 Future<int> _insertChannel(database, Channel channel, DateTime date) async {
