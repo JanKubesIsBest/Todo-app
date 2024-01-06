@@ -3,13 +3,24 @@ import 'package:flutter/material.dart';
 final unfuckYourLifeTheme = ThemeData(
   scaffoldBackgroundColor: Colors.black,
   primaryColor: Colors.black,
-  inputDecorationTheme: InputDecorationTheme(
-    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+  inputDecorationTheme: const InputDecorationTheme(
+    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
     hintStyle: TextStyle(
-      color: Colors.white.withOpacity(0.7),
+      color: Colors.white,
     ),
   ),
-  colorScheme: const ColorScheme.dark(),
+
+  textTheme: const TextTheme(
+      bodyLarge: TextStyle(),
+      bodyMedium: TextStyle(),
+    ).apply(
+      bodyColor: Colors.white, 
+      displayColor: Colors.white, 
+    ),
+    
+  appBarTheme: const AppBarTheme(
+    color: Colors.black,
+  ),
   dialogBackgroundColor: Colors.black,
   useMaterial3: true,
 );

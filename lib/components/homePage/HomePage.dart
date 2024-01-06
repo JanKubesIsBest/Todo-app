@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unfuckyourlife/components/homePage/drawer/drawer.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
@@ -102,20 +103,15 @@ class _HomePageState extends State<HomePage> {
 
       // now 17 default 18 -1
       // now - default
-      print(DateTime.now()
-          .difference(startNotifyingAt).inSeconds);
+      print(DateTime.now().difference(startNotifyingAt).inSeconds);
 
       // default - now
-      print(startNotifyingAt
-          .difference(DateTime.now()).inSeconds);
+      print(startNotifyingAt.difference(DateTime.now()).inSeconds);
 
       // TODO: Add the channel list is not updating, so make it updateable.
-      if (DateTime.now()
-          .difference(startNotifyingAt).inSeconds < 0) {
-        Timer(
-            startNotifyingAt
-                .difference(DateTime.now()), () {
-              NotificationService().showNotificationNow(defaultChannel);
+      if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
+        Timer(startNotifyingAt.difference(DateTime.now()), () {
+          NotificationService().showNotificationNow(defaultChannel);
           NotificationService()
               .showDailyAtTime(defaultChannel, startNotifyingAt);
         });
@@ -125,7 +121,7 @@ class _HomePageState extends State<HomePage> {
         // -2 + 24 = 22
         // 22 h after 17 is 15
         Duration x = startNotifyingAt.difference(DateTime.now());
-        Duration y = Duration(seconds: x.inSeconds + 60*60*24);
+        Duration y = Duration(seconds: x.inSeconds + 60 * 60 * 24);
         Timer(y, () {
           NotificationService()
               .showDailyAtTime(defaultChannel, startNotifyingAt);
@@ -138,8 +134,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const Drawer(
-        child: Text("TEXT"),
+      appBar: AppBar(
+        title: Text(
+          "Hello $name",
+          style: const TextStyle(
+              color: Colors.white, fontSize: 60, fontWeight: FontWeight.w100),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -150,16 +151,6 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Text(
-                    "Hello $name",
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 60,
-                        fontWeight: FontWeight.w100),
-                  ),
                   const Text(
                     "Todos:",
                     style: TextStyle(
@@ -219,6 +210,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      drawer: DrawerWithChannels(),
     );
   }
 
@@ -439,11 +431,9 @@ class _HomePageState extends State<HomePage> {
     List<Map<String, dynamic>> channelsMap = await retrieveChannels();
     channels = [Channel(0, "Custom", 0, true)];
     for (final Map<String, dynamic> map in channelsMap) {
-
       // If the channel is custom, don't add it as every custom channel is special.
       if (map['isCustom'] != 1) {
-        channels.add(Channel(map['id'], map['name'], map['notifier'],
-            false));
+        channels.add(Channel(map['id'], map['name'], map['notifier'], false));
       }
     }
 
@@ -531,13 +521,4 @@ void askForPermissions() async {
   if (status.isDenied) {
     Permission.notification.request();
   }
-  /*/
-  DateTime date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, DateTime.now().hour, DateTime.now().minute, DateTime.now().second + 10);
-
-  NotificationService().scheduleNotification(
-      title: 'Scheduled Notification',
-      body: 'Zkouska',
-      scheduledNotificationDateTime: date);
-
-   */
 }
