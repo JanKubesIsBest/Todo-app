@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
+import 'package:unfuckyourlife/model/database/insert_and_create.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
+
+import 'dart:async';
+
+import 'package:unfuckyourlife/model/notification/notifications.dart';
 
 class DrawerWithChannels extends StatefulWidget {
   const DrawerWithChannels({super.key});
@@ -16,6 +21,8 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
 
   final newChannelNameController = TextEditingController();
   final newChannelDescriptionController = TextEditingController();
+
+  TimeOfDay notifyAt = const TimeOfDay(hour: 12, minute: 0);
 
   @override
   void initState() {
@@ -86,44 +93,80 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Create new channel'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
-                      hintText: 'Channel name',
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> selectTime(BuildContext context) async {
+              final TimeOfDay? pickedS = await showTimePicker(
+                context: context,
+                initialTime: notifyAt,
+              );
+
+              if (pickedS != null) {
+                setState(() {
+                  notifyAt = pickedS;
+                });
+              }
+            }
+
+            return AlertDialog(
+              title: const Text('Create new channel'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          hintText: 'Channel name',
+                        ),
+                        controller: newChannelNameController,
+                      ),
                     ),
-                    controller: newChannelNameController,
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          hintText: 'Channel notification message',
+                        ),
+                        controller: newChannelDescriptionController,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => selectTime(context),
+                      child: Text(notifyAt.format(context)),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
-                      hintText: 'Channel notification message',
-                    ),
-                    controller: newChannelDescriptionController,
-                  ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Create'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Create'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+            );
+          },
         );
       },
     );
+  }
+
+  void addNewChannel() {
+      DateTime startNotifyingAt = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        notifyAt.hour,
+        notifyAt.minute,
+      );
+
+    // The zeros will be set in function
+    Channel newChannel = Channel(0, newChannelNameController.text, 0, false);
+
+    createNewChannel(newChannel, startNotifyingAt);
   }
 }

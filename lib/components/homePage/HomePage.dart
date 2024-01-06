@@ -108,25 +108,7 @@ class _HomePageState extends State<HomePage> {
       // default - now
       print(startNotifyingAt.difference(DateTime.now()).inSeconds);
 
-      // TODO: Add the channel list is not updating, so make it updateable.
-      if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
-        Timer(startNotifyingAt.difference(DateTime.now()), () {
-          NotificationService().showNotificationNow(defaultChannel);
-          NotificationService()
-              .showDailyAtTime(defaultChannel, startNotifyingAt);
-        });
-      } else {
-        // day - time between now and start notifying time.
-        // Example: it is 17, default time is 15. 15 - 17 = -2h
-        // -2 + 24 = 22
-        // 22 h after 17 is 15
-        Duration x = startNotifyingAt.difference(DateTime.now());
-        Duration y = Duration(seconds: x.inSeconds + 60 * 60 * 24);
-        Timer(y, () {
-          NotificationService()
-              .showDailyAtTime(defaultChannel, startNotifyingAt);
-        });
-      }
+      createNewChannel(defaultChannel, startNotifyingAt);
       prefs.setBool("notifying", true);
     }
   }

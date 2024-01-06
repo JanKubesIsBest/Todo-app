@@ -50,7 +50,7 @@ Future<int> addNewChannel(Channel channel, DateTime date,) async {
   
     final List<Map<String, dynamic>> channelListMap = await retrieveChannelByName(channel.name);
 
-    return channelListMap[0]["name"];
+    return channelListMap[0]["id"];
   }
 
   print("Channel does not exist");
