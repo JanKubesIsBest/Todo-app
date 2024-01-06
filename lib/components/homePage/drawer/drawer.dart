@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
-import 'package:unfuckyourlife/model/database/insert_and_create.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 
 import 'dart:async';
@@ -76,8 +75,20 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
                         onPressed: () {
                           print(channels[index].name);
                         },
-                        child: Text(channels[index].name));
+                        child: Column(
+                          children: [
+                            Text(channels[index].name),
+                            FutureBuilder<List<Map<String, dynamic>>>(future: retrieveNotificationsById(channels[index].notification), builder: ((context, snapshot) {
+                              if (snapshot.hasData) {
+                                  return Text("${snapshot.data![0]["hour"]}:${snapshot.data![0]["minute"]}");
+                              }else {
+                                return const CircularProgressIndicator();
+                              }
+                            }))
+                          ],
+                        ));
                   }
+                  return null;
                 },
                 itemCount: channels.length,
               ),
