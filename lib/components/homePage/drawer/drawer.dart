@@ -9,13 +9,15 @@ class DrawerWithChannels extends StatefulWidget {
   State<StatefulWidget> createState() {
     return _DrawerWithChannelsState();
   }
-
 }
 
 class _DrawerWithChannelsState extends State<DrawerWithChannels> {
   List<Channel> channels = [];
 
-@override
+  final newChannelNameController = TextEditingController();
+  final newChannelDescriptionController = TextEditingController();
+
+  @override
   void initState() {
     super.initState();
     retrieveChannelsAndAssingThem();
@@ -25,7 +27,8 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
     List channelsMaped = await retrieveChannels();
     List<Channel> newChannel = [];
     for (Map<String, dynamic> channelMap in channelsMaped) {
-      newChannel.add(Channel(channelMap["id"], channelMap["name"], channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false));
+      newChannel.add(Channel(channelMap["id"], channelMap["name"],
+          channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false));
     }
 
     setState(() {
@@ -52,15 +55,21 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
                   fontSize: 60,
                   fontWeight: FontWeight.w100),
             ),
+            ElevatedButton(
+                onPressed: () => {
+                      _showMyDialog(),
+                    },
+                child: const Text("Add new channel.")),
             Expanded(
               child: ListView.builder(
-                physics:
-                     NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   if (channels[index].isCustom == false) {
-                    return ElevatedButton(onPressed: () {
-                      print(channels[index].name);
-                    }, child: Text(channels[index].name));
+                    return ElevatedButton(
+                        onPressed: () {
+                          print(channels[index].name);
+                        },
+                        child: Text(channels[index].name));
                   }
                 },
                 itemCount: channels.length,
@@ -69,6 +78,52 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Create new channel'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      hintText: 'Channel name',
+                    ),
+                    controller: newChannelNameController,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      hintText: 'Channel notification message',
+                    ),
+                    controller: newChannelDescriptionController,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Create'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
