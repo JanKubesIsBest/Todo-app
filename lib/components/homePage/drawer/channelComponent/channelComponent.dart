@@ -1,87 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:unfuckyourlife/components/homePage/drawer/channelComponent/channelComponent.dart';
-import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
-
-import 'dart:async';
-
 import 'package:unfuckyourlife/model/notification/notifications.dart';
 
-class DrawerWithChannels extends StatefulWidget {
-  const DrawerWithChannels({super.key});
+class TodoButton extends StatefulWidget {
+  final Channel channel;
+
+  const TodoButton({super.key, required this.channel});
 
   @override
-  State<StatefulWidget> createState() {
-    return _DrawerWithChannelsState();
-  }
+  State<StatefulWidget> createState() => _TodoButtonState();
 }
 
-class _DrawerWithChannelsState extends State<DrawerWithChannels> {
-  List<Channel> channels = [];
-
+class _TodoButtonState extends State<TodoButton> {
   final newChannelNameController = TextEditingController();
   final newChannelDescriptionController = TextEditingController();
 
   TimeOfDay notifyAt = const TimeOfDay(hour: 12, minute: 0);
 
   @override
-  void initState() {
-    super.initState();
-    retrieveChannelsAndAssingThem();
-  }
-
-  Future retrieveChannelsAndAssingThem() async {
-    List channelsMaped = await retrieveChannels();
-    List<Channel> newChannel = [];
-    for (Map<String, dynamic> channelMap in channelsMaped) {
-      newChannel.add(Channel(channelMap["id"], channelMap["name"],
-          channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false));
-    }
-
-    setState(() {
-      channels = newChannel;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: Container(
-        color: Colors.black,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 15,
-            ),
-            const Text(
-              "Channels:",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 60,
-                  fontWeight: FontWeight.w100),
-            ),
-            ElevatedButton(
-                onPressed: () => {
-                      _showMyDialog(),
-                    },
-                child: const Text("Add new channel.")),
-            Expanded(
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  if (channels[index].isCustom == false) {
-                    return TodoButton(channel: channels[index]);
-                  }
-                  return null;
-                },
-                itemCount: channels.length,
-              ),
-            ),
-          ],
-        ),
+    return ElevatedButton(
+      onPressed: () {
+        _showMyDialog();
+      },
+      child: Column(
+        children: [
+          Text(widget.channel.name),
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: retrieveNotificationsById(widget.channel.notification),
+            builder: ((context, snapshot) {
+              if (snapshot.hasData) {
+                return Text(
+                    "${snapshot.data![0]["hour"]}:${snapshot.data![0]["minute"]}");
+              } else {
+                return const CircularProgressIndicator();
+              }
+            }),
+          ),
+        ],
       ),
     );
   }
@@ -140,9 +97,24 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('Create'),
+                  child: const Text('Edit'),
                   onPressed: () {
-                    // TODO: Create new channel
+                    // Delete the notification
+                    NotificationService()
+                        .cancelNotification(widget.channel.notification);
+                    // Reschedule it
+                    DateTime startNotifyingAt = DateTime(
+                      DateTime.now().year,
+                      DateTime.now().month,
+                      DateTime.now().day,
+                      notifyAt.hour,
+                      notifyAt.minute,
+                    );
+                    // Id is meant an id of a channel.
+                    createPeriodicallNotificationWithTimeCalculation(
+                        widget.channel, widget.channel.id, startNotifyingAt);
+
+                    // TODO: Update the database data.
                     Navigator.of(context).pop();
                   },
                 ),
@@ -152,20 +124,5 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
         );
       },
     );
-  }
-
-  void addNewChannel() {
-      DateTime startNotifyingAt = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-        notifyAt.hour,
-        notifyAt.minute,
-      );
-
-    // The zeros will be set in function
-    Channel newChannel = Channel(0, newChannelNameController.text, 0, false);
-
-    createNewChannel(newChannel, startNotifyingAt);
   }
 }

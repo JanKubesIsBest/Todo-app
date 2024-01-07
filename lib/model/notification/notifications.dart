@@ -93,7 +93,16 @@ Future<Channel> createNewChannel(
     startNotifyingAt,
   );
 
-  if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
+  createPeriodicallNotificationWithTimeCalculation(channel, id, startNotifyingAt);
+
+  List<Map<String, dynamic>> channelMapList = await retrieveChannelById(id);
+  Map<String, dynamic> channelMap = channelMapList[0];
+
+  return Channel(channelMap["id"], channelMap["name"], channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false);
+}
+
+void createPeriodicallNotificationWithTimeCalculation(Channel channel, int id, DateTime startNotifyingAt) {
+    if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
     Timer(startNotifyingAt.difference(DateTime.now()), () {
       NotificationService().showNotificationNow(channel);
       NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
@@ -109,9 +118,4 @@ Future<Channel> createNewChannel(
       NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
     });
   }
-
-  List<Map<String, dynamic>> channelMapList = await retrieveChannelById(id);
-  Map<String, dynamic> channelMap = channelMapList[0];
-
-  return Channel(channelMap["id"], channelMap["name"], channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false);
 }
