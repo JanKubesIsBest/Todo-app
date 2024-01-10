@@ -475,6 +475,7 @@ class _HomePageState extends State<HomePage> {
 
     for (int i = 0; i < todoList.length; i++) {
       DateTime deadline = await todoList[i].getDeadline();
+      print(deadline);
       if (deadline.year == DateTime.now().year &&
           deadline.day == DateTime.now().day &&
           deadline.month == DateTime.now().month) {

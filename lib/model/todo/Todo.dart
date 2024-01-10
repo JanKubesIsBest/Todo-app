@@ -37,11 +37,11 @@ class Todo {
   }
 
   Future<DateTime> getDeadline() async {
-    List<Map<String, dynamic>> mapedNotifList = await retrieveNotificationsById(deadline);
+    List<Map<String, dynamic>> mapedNotifList = await retrieveDeadlinesById(deadline);
     
     if (mapedNotifList.isNotEmpty) {
       Map<String, dynamic> mapedNotif = mapedNotifList[0];
-      return DateTime(mapedNotif['year'], mapedNotif['month'], mapedNotif['day'], mapedNotif['hour'], mapedNotif['minute']);
+      return DateTime(mapedNotif['year'], mapedNotif['month'], mapedNotif['day'],);
     }
     else {
       // should not happen

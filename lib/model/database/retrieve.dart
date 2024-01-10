@@ -19,6 +19,12 @@ Future<List<Map<String, dynamic>>> retrieveNotificationsById(int id) async {
   return maps;
 }
 
+Future<List<Map<String, dynamic>>> retrieveDeadlinesById(int id) async {
+  final db = await openOurDatabase();
+  final maps = await db.query('deadlines', where: 'id = ?', whereArgs: [id]);
+  return maps;
+}
+
 Future<List<Map<String, dynamic>>> retrieveChannels() async {
   final database = await openOurDatabase();
   final List<Map<String, dynamic>> maps = await database.query('channels');
