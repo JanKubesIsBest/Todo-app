@@ -337,7 +337,10 @@ class _HomePageState extends State<HomePage> {
                         channelId = await NotificationService()
                             .scheduleNotification(
                                 scheduledNotificationDateTime: date,
-                                channel: selectedChannel);
+                                channel: selectedChannel,
+                                title: newTodoNameController.text,
+                                body: newTodoDescriptionController.text,
+                                );
                       }
 
                       // add new deadline

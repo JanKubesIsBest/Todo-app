@@ -42,8 +42,6 @@ class NotificationService {
       String? payLoad,
       required DateTime scheduledNotificationDateTime,
       required Channel channel}) async {
-    print("Scheduling notification");
-    print(tz.TZDateTime.from(scheduledNotificationDateTime, tz.local));
     int id = await addNewChannel(channel, scheduledNotificationDateTime);
     
     notificationsPlugin.zonedSchedule(
