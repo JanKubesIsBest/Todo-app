@@ -43,17 +43,7 @@ Future<int> _insertNotification(database, DateTime date,)async {
 Future<int> addNewChannel(Channel channel, DateTime date,) async {
   WidgetsFlutterBinding.ensureInitialized();
   final database = await openOurDatabase();
-  // Todo: check if the channel already exists, then you don't have to make one and just return the id of it.
 
-  if (await checkIfTheChannelAlreadyExists(channel)) {
-    print("Channel already exists");
-  
-    final List<Map<String, dynamic>> channelListMap = await retrieveChannelByName(channel.name);
-
-    return channelListMap[0]["id"];
-  }
-
-  print("Channel does not exist");
   return _insertChannel(database, channel, date);
 }
 Future<int> _insertChannel(database, Channel channel, DateTime date) async {

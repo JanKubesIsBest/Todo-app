@@ -49,16 +49,3 @@ Future<List<Map<String, dynamic>>> retrieveDeadlines() async {
   final List<Map<String, dynamic>> maps = await database.query('deadlines');
   return maps;
 }
-
-Future<bool> checkIfTheChannelAlreadyExists(Channel channel) async {
-  List<Map<String, dynamic>> channelsMap = await retrieveChannels();
-
-  for (Map<String, dynamic> mapChannel in channelsMap) {
-    // As new channel does not have id, I am comparing them by name, that means that when you create new channel, they have to have unique name.
-    if (mapChannel["name"] == channel.name) {
-      return true;
-    }
-  }
-
-  return false;
-}

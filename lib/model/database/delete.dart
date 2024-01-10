@@ -8,6 +8,8 @@ Future<void> deleteTodo(Todo todo) async {
   // Get a reference to the database.
   final db = await openOurDatabase();
 
+  print(todo.channel);
+  print(await retrieveChannels());
   // Get Channel
   List<Map<String, dynamic>> mapChannelList =
       await retrieveChannelById(todo.channel);
@@ -42,25 +44,26 @@ Future<void> deleteTodo(Todo todo) async {
       // Pass the T_odo's id as a whereArg to prevent SQL injection.
       whereArgs: [todo.channel],
     );
-
-    // Remove deadline
-    await db.delete(
-      'deadlines',
-      // Use a `where` clause to delete a specific T_odo.
-      where: 'id = ?',
-      // Pass the T_odo's id as a whereArg to prevent SQL injection.
-      whereArgs: [todo.deadline],
-    );
-
-    // Remove the T_odo from the database.
-    await db.delete(
-      'todos',
-      // Use a `where` clause to delete a specific T_odo.
-      where: 'id = ?',
-      // Pass the T_odo's id as a whereArg to prevent SQL injection.
-      whereArgs: [todo.id],
-    );
   }
+  // Todo and deadline will be removed. Does not matter if it is custom or not.
+
+  // Remove deadline
+  await db.delete(
+    'deadlines',
+    // Use a `where` clause to delete a specific T_odo.
+    where: 'id = ?',
+    // Pass the T_odo's id as a whereArg to prevent SQL injection.
+    whereArgs: [todo.deadline],
+  );
+
+  // Remove the T_odo from the database.
+  await db.delete(
+    'todos',
+    // Use a `where` clause to delete a specific T_odo.
+    where: 'id = ?',
+    // Pass the T_odo's id as a whereArg to prevent SQL injection.
+    whereArgs: [todo.id],
+  );
 }
 
 Future<void> deleteNotification(notificationId) async {
