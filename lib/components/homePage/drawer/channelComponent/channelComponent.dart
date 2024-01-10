@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
+import 'package:unfuckyourlife/model/database/delete.dart';
+import 'package:unfuckyourlife/model/database/insert_and_create.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
+import 'package:unfuckyourlife/model/database/update.dart';
 import 'package:unfuckyourlife/model/notification/notifications.dart';
 
 class TodoButton extends StatefulWidget {
@@ -98,7 +101,8 @@ class _TodoButtonState extends State<TodoButton> {
               actions: <Widget>[
                 TextButton(
                   child: const Text('Edit'),
-                  onPressed: () {
+                  onPressed: () async {
+                    print(await NotificationService().getActiveNotifications());
                     // Delete the notification
                     NotificationService()
                         .cancelNotification(widget.channel.notification);
@@ -110,11 +114,14 @@ class _TodoButtonState extends State<TodoButton> {
                       notifyAt.hour,
                       notifyAt.minute,
                     );
+
                     // Id is meant an id of a channel.
                     createPeriodicallNotificationWithTimeCalculation(
                         widget.channel, widget.channel.id, startNotifyingAt);
 
-                    // TODO: Update the database data.
+                    // Update Notification row with right time:
+                    updateNotificationById(widget.channel.id, startNotifyingAt);
+
                     Navigator.of(context).pop();
                   },
                 ),

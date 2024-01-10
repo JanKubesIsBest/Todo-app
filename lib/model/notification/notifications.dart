@@ -42,8 +42,10 @@ class NotificationService {
       String? payLoad,
       required DateTime scheduledNotificationDateTime,
       required Channel channel}) async {
-    // Todo make work with channels
+    print("Scheduling notification");
+    print(tz.TZDateTime.from(scheduledNotificationDateTime, tz.local));
     int id = await addNewChannel(channel, scheduledNotificationDateTime);
+    
     notificationsPlugin.zonedSchedule(
         id,
         title,
@@ -56,8 +58,16 @@ class NotificationService {
     return id;
   }
 
-  Future<List<PendingNotificationRequest>> getActiveNotifications() async {
-    return await notificationsPlugin.pendingNotificationRequests();
+  Future<List<int>> getActiveNotifications() async {
+    List<PendingNotificationRequest> notifications = await notificationsPlugin.pendingNotificationRequests();
+
+    List<int> notifId = [];
+
+    for (PendingNotificationRequest notif in notifications) {
+      notifId.add(notif.id);
+    }
+
+    return notifId;
   }
 
   Future<void> showDailyAtTime(
@@ -102,10 +112,19 @@ Future<Channel> createNewChannel(
 }
 
 void createPeriodicallNotificationWithTimeCalculation(Channel channel, int id, DateTime startNotifyingAt) {
+  // TODO: Check if the coresponding channel is starts at this time still.
     if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
-    Timer(startNotifyingAt.difference(DateTime.now()), () {
-      NotificationService().showNotificationNow(channel);
-      NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
+      // Retrieve channel
+    Timer(startNotifyingAt.difference(DateTime.now()), () async {
+      List<Map<String, dynamic>> notificationMapedList = await retrieveNotificationsById(channel.notification);
+
+      Map<String, dynamic> notificationMaped = notificationMapedList[0];
+      
+      // I hope there is no delay...
+      if (notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute) {
+        NotificationService().showNotificationNow(channel);
+        NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
+      }
     });
   } else {
     // day - time between now and start notifying time.
@@ -114,8 +133,14 @@ void createPeriodicallNotificationWithTimeCalculation(Channel channel, int id, D
     // 22 h after 17 is 15
     Duration x = startNotifyingAt.difference(DateTime.now());
     Duration y = Duration(seconds: x.inSeconds + 60 * 60 * 24);
-    Timer(y, () {
-      NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
+    Timer(y, () async {
+      List<Map<String, dynamic>> notificationMapedList = await retrieveNotificationsById(channel.notification);
+
+      Map<String, dynamic> notificationMaped = notificationMapedList[0];
+
+      if (notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute) {
+        NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
+      }
     });
   }
 }

@@ -71,11 +71,13 @@ class _HomePageState extends State<HomePage> {
     var x = await retrieveTodos();
     var z = await retrieveDeadlines();
     var i = await retrieveNotifications();
+    var m = await NotificationService().getActiveNotifications();
 
     print("Channels: ${y}");
     print("Todos: ${x}");
     print("deadlines:  ${z}");
     print("notifications:  ${i}");
+    print("Pending notifications:  ${m}");
   }
 
   void getName() async {
@@ -324,6 +326,7 @@ class _HomePageState extends State<HomePage> {
                       // If the the custom option is selected, you always make new channels that have custom attributes
                       int channelId = selectedChannel.id;
                       if (selectedChannel.isCustom == true) {
+                        print("Custom !!!!!!");
                         DateTime date = DateTime(
                           selectedDateForDeadline.year,
                           selectedDateForDeadline.month,
