@@ -292,10 +292,10 @@ class _HomePageState extends State<HomePage> {
                                     ))
                                 .toList(),
                             initialSelection: channels.firstOrNull,
-                            onSelected: (Channel? selectedChannel) {
+                            onSelected: (Channel? newSelectedChannel) {
                               setState(() {
-                                if (selectedChannel != null) {
-                                  selectedChannel = selectedChannel;
+                                if (newSelectedChannel != null) {
+                                  selectedChannel = newSelectedChannel;
                                 }
                               });
                             },
@@ -331,6 +331,7 @@ class _HomePageState extends State<HomePage> {
                       // Add new channel or connected to already created one
                       // If the the custom option is selected, you always make new channels that have custom attributes
                       int channelId = selectedChannel.id;
+
                       if (selectedChannel.isCustom == true) {
                         print("Custom !!!!!!");
                         DateTime date = DateTime(
