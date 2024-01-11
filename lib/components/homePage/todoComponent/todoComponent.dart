@@ -24,9 +24,12 @@ class TodoComponent extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    todo.name,
-                    style: const TextStyle(fontSize: 20),
+                  Expanded(
+                    child: Text(
+                      todo.name,
+                      maxLines: 3,
+                      style: const TextStyle(fontSize: 20),
+                    ),
                   ),
                   IconButton(onPressed: () async {
                     await deleteTodo(todo);
