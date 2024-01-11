@@ -1,4 +1,3 @@
-import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
 Future<List<Map<String, dynamic>>> retrieveTodos() async {
   print("retriving todos");

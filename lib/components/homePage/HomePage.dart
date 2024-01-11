@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(
           "Hello $name",
           style: const TextStyle(
-              color: Colors.white, fontSize: 60, fontWeight: FontWeight.w100),
+              color: Colors.white, fontSize: 50, fontWeight: FontWeight.w100),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -173,7 +173,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(15.0),
               child: Ink(
                 decoration: const ShapeDecoration(
-                  color: Colors.grey,
+                  color: Color.fromARGB(255, 59, 140, 61),
                   shape: CircleBorder(),
                 ),
                 child: IconButton(
@@ -281,21 +281,27 @@ class _HomePageState extends State<HomePage> {
                           controller: newTodoDescriptionController,
                         ),
                       ),
-                      DropdownMenu(
-                        dropdownMenuEntries: channels
-                            .map((Channel e) => DropdownMenuEntry(
-                                  value: e,
-                                  label: e.name,
-                                ))
-                            .toList(),
-                        initialSelection: channels.firstOrNull,
-                        onSelected: (Channel? _selectedChannel) {
-                          setState(() {
-                            if (_selectedChannel != null) {
-                              selectedChannel = _selectedChannel;
-                            }
-                          });
-                        },
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownMenu(
+                            dropdownMenuEntries: channels
+                                .map((Channel e) => DropdownMenuEntry(
+                                      value: e,
+                                      label: e.name,
+                                    ))
+                                .toList(),
+                            initialSelection: channels.firstOrNull,
+                            onSelected: (Channel? selectedChannel) {
+                              setState(() {
+                                if (selectedChannel != null) {
+                                  selectedChannel = selectedChannel;
+                                }
+                              });
+                            },
+                            textStyle: const TextStyle(color: Colors.grey),
+                          ),
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () => selectDate(context),

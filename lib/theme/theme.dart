@@ -10,6 +10,8 @@ final unfuckYourLifeTheme = ThemeData(
     ),
   ),
 
+  buttonTheme: const ButtonThemeData(buttonColor: Colors.grey), 
+
   textTheme: const TextTheme(
       bodyLarge: TextStyle(),
       bodyMedium: TextStyle(),

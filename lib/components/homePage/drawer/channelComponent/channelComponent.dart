@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
-import 'package:unfuckyourlife/model/database/delete.dart';
-import 'package:unfuckyourlife/model/database/insert_and_create.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/database/update.dart';
 import 'package:unfuckyourlife/model/notification/notifications.dart';
