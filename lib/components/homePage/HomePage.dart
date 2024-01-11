@@ -194,7 +194,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      drawer: DrawerWithChannels(),
+      drawer: DrawerWithChannels(updateChannel: setStateWithUpdatedChannels,),
     );
   }
 
@@ -215,7 +215,7 @@ class _HomePageState extends State<HomePage> {
               final DateTime? picked = await showDatePicker(
                   context: context,
                   initialDate: selectedDateForDeadline,
-                  firstDate: DateTime(2015, 8),
+                  firstDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, DateTime.now().hour, DateTime.now().minute - 1),
                   lastDate: DateTime(2101));
               if (picked != null && picked != selectedDateForDeadline) {
                 setState(() {
@@ -423,14 +423,9 @@ class _HomePageState extends State<HomePage> {
   Future<List<Widget>> retrieveTodosAndSortThemAndRetrieveChannels() async {
     print("Retriving");
     // Channels:
-    List<Map<String, dynamic>> channelsMap = await retrieveChannels();
-    channels = [Channel(0, "Custom", 0, true)];
-    for (final Map<String, dynamic> map in channelsMap) {
-      // If the channel is custom, don't add it as every custom channel is special.
-      if (map['isCustom'] != 1) {
-        channels.add(Channel(map['id'], map['name'], map['notifier'], false));
-      }
-    }
+    List<Channel> newChannels = await getChannelsInChannelClassType();
+
+    channels = newChannels;
 
     // Todos:
     print("Working on todos");
@@ -508,6 +503,28 @@ class _HomePageState extends State<HomePage> {
           removeTodoInUi: removeFromTodoList));
     }
     return widgets;
+  }
+
+  Future<void> setStateWithUpdatedChannels() async {
+    List<Channel> updatedChannel = await getChannelsInChannelClassType();
+
+    setState(() {
+      channels = updatedChannel;
+    });
+  }
+  
+
+  Future<List<Channel>> getChannelsInChannelClassType() async {
+    List<Map<String, dynamic>> channelsMap = await retrieveChannels();
+    List<Channel> newChannels = [Channel(0, "Custom", 0, true)];
+    for (final Map<String, dynamic> map in channelsMap) {
+      // If the channel is custom, don't add it as every custom channel is special.
+      if (map['isCustom'] != 1) {
+        newChannels.add(Channel(map['id'], map['name'], map['notifier'], false));
+      }
+    }
+
+    return newChannels;
   }
 }
 

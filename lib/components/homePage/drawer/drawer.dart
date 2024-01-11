@@ -8,7 +8,8 @@ import 'dart:async';
 import 'package:unfuckyourlife/model/notification/notifications.dart';
 
 class DrawerWithChannels extends StatefulWidget {
-  const DrawerWithChannels({super.key});
+  final Function updateChannel;
+  const DrawerWithChannels({super.key, required this.updateChannel});
 
   @override
   State<StatefulWidget> createState() {
@@ -140,8 +141,26 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
               actions: <Widget>[
                 TextButton(
                   child: const Text('Create'),
-                  onPressed: () {
-                    // TODO: Create new channel
+                  onPressed: () async {
+                    DateTime startNotifyingAt = DateTime(
+                      DateTime.now().year,
+                      DateTime.now().month,
+                      DateTime.now().day,
+                      notifyAt.hour,
+                      notifyAt.minute,
+                    );
+
+                    // TODO: Impelement the description
+
+                    // The only thing that is needed is name and is custom, so does not matter much
+                    Channel channel = Channel(0, newChannelNameController.text, 0, false);
+                    Channel newChannel = await createNewChannel(channel, startNotifyingAt);
+
+                    retrieveChannelsAndAssingThem();
+
+                    // Update Channels so you can see them immadietly in the AlertDialog while adding new Todo
+                    widget.updateChannel();
+
                     Navigator.of(context).pop();
                   },
                 ),
@@ -154,13 +173,13 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
   }
 
   void addNewChannel() {
-      DateTime startNotifyingAt = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-        notifyAt.hour,
-        notifyAt.minute,
-      );
+    DateTime startNotifyingAt = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+      notifyAt.hour,
+      notifyAt.minute,
+    );
 
     // The zeros will be set in function
     Channel newChannel = Channel(0, newChannelNameController.text, 0, false);
