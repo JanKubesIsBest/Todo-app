@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unfuckyourlife/components/homePage/List/list.dart';
 import 'package:unfuckyourlife/components/homePage/drawer/drawer.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
@@ -132,30 +133,12 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(20),
             child: Align(
               alignment: Alignment.bottomLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Todos:",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w100),
-                  ),
-                  FutureBuilder(
-                    future: retrieveTodosAndSortThemAndRetrieveChannels(),
+              child: FutureBuilder<List<Todo>>(
+                    future: retrieveTodosAndChannels(),
                     builder: (BuildContext context,
-                        AsyncSnapshot<List<Widget>> snapshot) {
+                        AsyncSnapshot<List<Todo>> snapshot) {
                       if (snapshot.hasData) {
-                        List<Widget> widgets = snapshot.data as List<Widget>;
-
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: widgets.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return widgets[index];
-                          },
-                        );
+                        return TodoList(todos: snapshot.data != null ? snapshot.data as List<Todo> : []);
                       } else {
                         return const Center(
                           child: CircularProgressIndicator(),
@@ -163,8 +146,6 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                   ),
-                ],
-              ),
             ),
           ),
           Align(
@@ -382,10 +363,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void uiUpdateTodos() async {
-    List<Map<String, dynamic>> retrievedTodos = await retrieveTodos();
-    retrieveTodosSorted(retrievedTodos);
+    List<Todo> retrievedTodos = await retrieveOnlyTodos();
     setState(() {
-      _todos = _todos;
+      _todos = retrievedTodos;
     });
   }
 
@@ -420,7 +400,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<List<Widget>> retrieveTodosAndSortThemAndRetrieveChannels() async {
+  Future<List<Todo>> retrieveTodosAndChannels() async {
     print("Retriving");
     // Channels:
     List<Channel> newChannels = await getChannelsInChannelClassType();
@@ -428,81 +408,21 @@ class _HomePageState extends State<HomePage> {
     channels = newChannels;
 
     // Todos:
+    _todos = await retrieveOnlyTodos();
+    return _todos;
+  }
+
+  Future<List<Todo>> retrieveOnlyTodos() async {
+    // Todos:
     print("Working on todos");
     List<Map<String, dynamic>> todos = await retrieveTodos();
 
-    if (todos.isEmpty) {
-      _todos = [];
-      return [const Text("Gay")];
+    List<Todo> retrievedTodos = [];
+    for (var i = 0; i < todos.length; i++) {
+      retrievedTodos.add(mapToTodo(todos[i]));
     }
-    await retrieveTodosSorted(todos);
-    return await todosWidgets(_todos);
-  }
 
-  Future<void> retrieveTodosSorted(List<Map<String, dynamic>> map) async {
-    _todos = [];
-    for (var i = 0; i < map.length; i++) {
-      _todos.add(mapToTodo(map[i]));
-    }
-    bool runAgain = true;
-    if (_todos.length > 1) {
-      while (runAgain) {
-        runAgain = false;
-        for (var i = 1; i < _todos.length; i++) {
-          DateTime deadlineOne = await _todos[i].getDeadline();
-          DateTime deadlineTwo = await _todos[i - 1].getDeadline();
-
-          int dayX = deadlineOne.millisecondsSinceEpoch;
-          int dayY = deadlineTwo.millisecondsSinceEpoch;
-
-          if (dayX.compareTo(dayY) < 0) {
-            _todos.insert(i - 1, _todos[i]);
-            _todos.removeAt(i + 1);
-            runAgain = true;
-          }
-        }
-      }
-    }
-  }
-
-  Future<List<Widget>> todosWidgets(List<Todo> todoList) async {
-    List<Widget> widgets = [];
-
-    bool isToday = false;
-
-    bool addedToday = false;
-    bool addedOther = false;
-
-    print(todoList);
-
-    for (int i = 0; i < todoList.length; i++) {
-      DateTime deadline = await todoList[i].getDeadline();
-      print(deadline);
-      if (deadline.year == DateTime.now().year &&
-          deadline.day == DateTime.now().day &&
-          deadline.month == DateTime.now().month) {
-        isToday = true;
-      } else {
-        isToday = false;
-      }
-
-      if (isToday && !addedToday) {
-        widgets.add(const Text("Today"));
-        widgets.add(const Divider());
-        addedToday = true;
-      }
-      if (!isToday && !addedOther) {
-        widgets.add(const Text("Other"));
-        widgets.add(const Divider());
-        addedOther = true;
-      }
-
-      widgets.add(TodoComponent(
-          todo: todoList[i],
-          placeInTheTodosList: i,
-          removeTodoInUi: removeFromTodoList));
-    }
-    return widgets;
+    return retrievedTodos;
   }
 
   Future<void> setStateWithUpdatedChannels() async {
