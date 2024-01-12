@@ -6,7 +6,8 @@ import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 class TodoList extends StatefulWidget {
   final List<Todo> todos;
-  const TodoList({super.key, required this.todos});
+  final Channel channel;
+  const TodoList({super.key, required this.todos, required this.channel});
 
   @override
   State<StatefulWidget> createState() => _TodoListState();
@@ -54,6 +55,16 @@ class _TodoListState extends State<TodoList> {
   } 
 
   Future<List<Widget>> sortTodosAndMakeThemWidgets() async {
+    // Remove Todos that are not linked to this channel
+    List<Todo> removedTodos = [];
+    for (int x = 0; x < _todos.length; x++) {
+      if (_todos[x].channel == widget.channel.id) {
+        removedTodos.add(_todos[x]);
+      }
+    }
+
+    _todos = removedTodos;
+    
     // Todos:
     if (_todos.isEmpty) {
       _todos = [];

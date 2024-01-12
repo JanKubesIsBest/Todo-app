@@ -25,23 +25,16 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
 
   TimeOfDay notifyAt = const TimeOfDay(hour: 12, minute: 0);
 
-  @override
-  void initState() {
-    super.initState();
-    retrieveChannelsAndAssingThem();
-  }
-
-  Future retrieveChannelsAndAssingThem() async {
+  Future<List<Channel>> retrieveChannelsAndAssingThem() async {
     List channelsMaped = await retrieveChannels();
+    print(channelsMaped);
     List<Channel> newChannel = [];
     for (Map<String, dynamic> channelMap in channelsMaped) {
       newChannel.add(Channel(channelMap["id"], channelMap["name"],
           channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false));
     }
-
-    setState(() {
-      channels = newChannel;
-    });
+    print(newChannel);
+    return newChannel;
   }
 
   @override
@@ -69,15 +62,33 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
                     },
                 child: const Text("Add new channel.")),
             Expanded(
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  if (channels[index].isCustom == false) {
-                    return TodoButton(channel: channels[index]);
+              child: FutureBuilder(
+                future: retrieveChannelsAndAssingThem(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<Channel>> snapshot) {
+                  if (snapshot.hasData) {
+                    channels = snapshot.data as List<Channel>;
+ 
+                    List<Widget> widgets = [];
+
+                    for (Channel x in channels) {
+                      print(x.isCustom);
+                      if (x.isCustom != true){
+                        print("ADDDDDIDNG ");
+                        widgets.add(TodoButton(channel: x));
+                      }
+                    }
+
+                    return ListView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [...widgets],
+                    );
+                  } else {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
                   }
-                  return null;
                 },
-                itemCount: channels.length,
               ),
             ),
           ],
@@ -153,7 +164,8 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
                     // TODO: Impelement the description
 
                     // The only thing that is needed is name and is custom, so does not matter much
-                    Channel channel = Channel(0, newChannelNameController.text, 0, false);
+                    Channel channel =
+                        Channel(0, newChannelNameController.text, 0, false);
                     await createNewChannel(channel, startNotifyingAt);
 
                     retrieveChannelsAndAssingThem();
