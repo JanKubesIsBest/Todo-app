@@ -3,51 +3,51 @@ import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.d
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
-import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
+
 class TodoList extends StatelessWidget {
   final List<Todo> todos;
   final Channel channel;
   final Function uiUpdateTodos;
-  const TodoList({super.key, required this.todos, required this.channel, required this.uiUpdateTodos});
-
+  const TodoList(
+      {super.key,
+      required this.todos,
+      required this.channel,
+      required this.uiUpdateTodos});
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${channel.name}: ",
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w100),
-                  ),
-                  FutureBuilder(
-                    future: sortTodosAndMakeThemWidgets(todos),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<List<Widget>> snapshot) {
-                      if (snapshot.hasData) {
-                        List<Widget> widgets = snapshot.data as List<Widget>;
-                        
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: widgets.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return widgets[index];
-                          },
-                        );
-                      } else {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                    },
-                  ),
-                ],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "${channel.name}: ",
+          style: const TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.w100),
+        ),
+        FutureBuilder(
+          future: sortTodosAndMakeThemWidgets(todos),
+          builder:
+              (BuildContext context, AsyncSnapshot<List<Widget>> snapshot) {
+            if (snapshot.hasData) {
+              List<Widget> widgets = snapshot.data as List<Widget>;
+
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: widgets.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return widgets[index];
+                },
               );
-  } 
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
 
   Future<List<Widget>> sortTodosAndMakeThemWidgets(List<Todo> _todos) async {
     // Remove Todos that are not linked to this channel
@@ -59,7 +59,7 @@ class TodoList extends StatelessWidget {
         removedTodosAndSortedTodos.add(_todos[x]);
       }
     }
-    
+
     // If the list is empty, return nothing
     if (removedTodosAndSortedTodos.isEmpty) {
       return [const Text("Gay")];
@@ -84,6 +84,7 @@ class TodoList extends StatelessWidget {
           int dayX = deadlineOne.millisecondsSinceEpoch;
           int dayY = deadlineTwo.millisecondsSinceEpoch;
 
+          // Compare todos by how far are they from now.
           if (dayX.compareTo(dayY) < 0) {
             sortedTodos.insert(i - 1, sortedTodos[i]);
             sortedTodos.removeAt(i + 1);
@@ -109,7 +110,8 @@ class TodoList extends StatelessWidget {
     // Divide Today and future.
     for (int i = 0; i < todoList.length; i++) {
       DateTime deadline = await todoList[i].getDeadline();
-      print(deadline);
+
+      // Check if the Todo is for today
       if (deadline.year == DateTime.now().year &&
           deadline.day == DateTime.now().day &&
           deadline.month == DateTime.now().month) {
@@ -143,7 +145,8 @@ class TodoList extends StatelessWidget {
     for (final Map<String, dynamic> map in channelsMap) {
       // If the channel is custom, don't add it as every custom channel is special.
       if (map['isCustom'] != 1) {
-        newChannels.add(Channel(map['id'], map['name'], map['notifier'], false));
+        newChannels
+            .add(Channel(map['id'], map['name'], map['notifier'], false));
       }
     }
 

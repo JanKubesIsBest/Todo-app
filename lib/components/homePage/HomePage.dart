@@ -5,7 +5,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/List/list.dart';
 import 'package:unfuckyourlife/components/homePage/drawer/drawer.dart';
-import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 
@@ -193,6 +192,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _showMyDialog() {
+    selectedChannel = Channel(0, "Custom", 0, true);
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -336,6 +336,7 @@ class _HomePageState extends State<HomePage> {
                           notifyAt.hour,
                           notifyAt.minute,
                         );
+
                         channelId =
                             await NotificationService().scheduleNotification(
                           scheduledNotificationDateTime: date,
