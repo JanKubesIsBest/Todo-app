@@ -137,6 +137,7 @@ void createPeriodicallNotificationWithTimeCalculation(Channel channel, int id, D
       Map<String, dynamic> notificationMaped = notificationMapedList[0];
 
       if (notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute) {
+        NotificationService().showNotificationNow(channel);
         NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
       }
     });
