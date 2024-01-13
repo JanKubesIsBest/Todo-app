@@ -25,7 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String name = "";
-  List<Todo> _todos = [];
+  List<Todo> todos = [];
 
   final newTodoNameController = TextEditingController();
   final newTodoDescriptionController = TextEditingController();
@@ -114,11 +114,16 @@ class _HomePageState extends State<HomePage> {
       createNewChannel(defaultChannel, startNotifyingAt);
       prefs.setBool("notifying", true);
     }
+
+    retrieveTodosAndChannels();
   }
 
   @override
   Widget build(BuildContext context) {
     final PageController controller = PageController();
+
+    print("BUILD TRIGGERED");
+    print(todos);
 
     return Scaffold(
       appBar: AppBar(
@@ -135,36 +140,16 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(20),
             child: Align(
               alignment: Alignment.bottomLeft,
-              child: FutureBuilder<List<Todo>>(
-                future: retrieveTodosAndChannels(),
-                builder:
-                    (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
-                  if (snapshot.hasData) {
-                    List<Channel> notCustomChannels = [];
-
-                    for (Channel chan in channels) {
-                      if (chan.isCustom != true) {
-                        notCustomChannels.add(chan);
-                      }
-                    }
-                    return PageView.builder(
-                      itemCount: notCustomChannels.length,
+              child: PageView.builder(
+                      itemCount: notCustomChannelsReturnFunction().length,
                       itemBuilder: (BuildContext context, int index) {
                         return TodoList(
-                          channel: notCustomChannels[index],
-                          todos: snapshot.data != null
-                              ? snapshot.data as List<Todo>
-                              : [],
+                          channel: notCustomChannelsReturnFunction()[index],
+                          todos: todos,
+                          uiUpdateTodos: uiUpdateTodos,
                         );
                       },
-                    );
-                  } else {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                },
-              ),
+                    ),
             ),
           ),
           Align(
@@ -200,13 +185,25 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  List<Channel> notCustomChannelsReturnFunction() {
+    List<Channel> notCustomChannels = [];
+
+    for (Channel chan in channels) {
+      if (chan.isCustom != true) {
+        notCustomChannels.add(chan);
+      }
+    }
+
+    return notCustomChannels;
+  }
+
   void removeFromTodoList(int placeInList) {
     setState(() {
-      _todos.removeAt(placeInList);
+      todos.removeAt(placeInList);
     });
   }
 
-  Future<void> _showMyDialog() async {
+  Future<void> _showMyDialog() {
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -373,7 +370,8 @@ class _HomePageState extends State<HomePage> {
                         deadline: deadlineId,
                         channel: channelId,
                       );
-                      addNewTodoToDatabase(newTodo);
+                      
+                      await addNewTodoToDatabase(newTodo);
                       uiUpdateTodos();
 
                       Navigator.of(context).pop();
@@ -388,10 +386,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void uiUpdateTodos() async {
+  void uiUpdateTodos() async { 
     List<Todo> retrievedTodos = await retrieveOnlyTodos();
+    print("New TODO !!!!!!!!");
+    print(retrievedTodos);
     setState(() {
-      _todos = retrievedTodos;
+      todos = retrievedTodos;
     });
   }
 
@@ -426,16 +426,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<List<Todo>> retrieveTodosAndChannels() async {
+  Future<void> retrieveTodosAndChannels() async {
     print("Retriving");
     // Channels:
     List<Channel> newChannels = await getChannelsInChannelClassType();
 
-    channels = newChannels;
-
     // Todos:
-    _todos = await retrieveOnlyTodos();
-    return _todos;
+    List<Todo> retrievedTodos = await retrieveOnlyTodos();
+    
+    setState(() {
+      todos = retrievedTodos;
+      channels = newChannels;
+    });
   }
 
   Future<List<Todo>> retrieveOnlyTodos() async {

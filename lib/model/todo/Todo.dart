@@ -45,7 +45,7 @@ class Todo {
     }
     else {
       // should not happen
-      print("!!!!!!!!!!!!!! Notifier was not found.");
+      print("!!!!!!!!!!!!!! Deadline was not found.");
       return DateTime.now();
     }
   }

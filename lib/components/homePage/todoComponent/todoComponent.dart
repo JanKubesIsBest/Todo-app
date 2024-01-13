@@ -7,8 +7,8 @@ class TodoComponent extends StatelessWidget {
   final Todo todo;
   final int placeInTheTodosList;
 
-  final Function(int placeInTheTodosList) removeTodoInUi;
-  const TodoComponent({super.key, required this.todo, required this.placeInTheTodosList, required this.removeTodoInUi});
+  final Function uiUpdateTodos;
+  const TodoComponent({super.key, required this.todo, required this.placeInTheTodosList, required this.uiUpdateTodos});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class TodoComponent extends StatelessWidget {
                   ),
                   IconButton(onPressed: () async {
                     await deleteTodo(todo);
-                    removeTodoInUi(placeInTheTodosList);
+                    uiUpdateTodos();
                   }, icon: const Icon(Icons.delete), color: const Color.fromARGB(255, 183, 14, 14),),
                 ],
               ),

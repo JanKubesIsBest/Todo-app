@@ -4,21 +4,16 @@ import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
-class TodoList extends StatefulWidget {
+class TodoList extends StatelessWidget {
   final List<Todo> todos;
   final Channel channel;
-  const TodoList({super.key, required this.todos, required this.channel});
+  final Function uiUpdateTodos;
+  const TodoList({super.key, required this.todos, required this.channel, required this.uiUpdateTodos});
 
-  @override
-  State<StatefulWidget> createState() => _TodoListState();
-
-}
-class _TodoListState extends State<TodoList> {
-  late List<Todo> _todos;
 
   @override
   Widget build(BuildContext context) {
-    _todos = widget.todos;
+
     return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -30,12 +25,12 @@ class _TodoListState extends State<TodoList> {
                         fontWeight: FontWeight.w100),
                   ),
                   FutureBuilder(
-                    future: sortTodosAndMakeThemWidgets(),
+                    future: sortTodosAndMakeThemWidgets(todos),
                     builder: (BuildContext context,
                         AsyncSnapshot<List<Widget>> snapshot) {
                       if (snapshot.hasData) {
                         List<Widget> widgets = snapshot.data as List<Widget>;
-
+                        
                         return ListView.builder(
                           shrinkWrap: true,
                           itemCount: widgets.length,
@@ -54,49 +49,51 @@ class _TodoListState extends State<TodoList> {
               );
   } 
 
-  Future<List<Widget>> sortTodosAndMakeThemWidgets() async {
+  Future<List<Widget>> sortTodosAndMakeThemWidgets(List<Todo> _todos) async {
     // Remove Todos that are not linked to this channel
-    List<Todo> removedTodos = [];
+    List<Todo> removedTodosAndSortedTodos = [];
+
+    // First remove all todos that don't match the channel id
     for (int x = 0; x < _todos.length; x++) {
-      if (_todos[x].channel == widget.channel.id) {
-        removedTodos.add(_todos[x]);
+      if (_todos[x].channel == channel.id) {
+        removedTodosAndSortedTodos.add(_todos[x]);
       }
     }
-
-    _todos = removedTodos;
     
-    // Todos:
-    if (_todos.isEmpty) {
-      _todos = [];
+    // If the list is empty, return nothing
+    if (removedTodosAndSortedTodos.isEmpty) {
       return [const Text("Gay")];
     }
 
-    // Sorting todos, this function will also filter channels
-    await sortTodos(_todos);
+    // Sorting todos
+    removedTodosAndSortedTodos = await sortTodos(removedTodosAndSortedTodos);
 
-    return await todosWidgets(_todos);
+    return await todosWidgets(removedTodosAndSortedTodos);
   }
 
-  Future<void> sortTodos(List<Todo> _todos) async {
+  Future<List<Todo>> sortTodos(List<Todo> todos) async {
+    List<Todo> sortedTodos = todos;
     bool runAgain = true;
-    if (_todos.length > 1) {
+    if (sortedTodos.length > 1) {
       while (runAgain) {
         runAgain = false;
-        for (var i = 1; i < _todos.length; i++) {
-          DateTime deadlineOne = await _todos[i].getDeadline();
-          DateTime deadlineTwo = await _todos[i - 1].getDeadline();
+        for (var i = 1; i < sortedTodos.length; i++) {
+          DateTime deadlineOne = await sortedTodos[i].getDeadline();
+          DateTime deadlineTwo = await sortedTodos[i - 1].getDeadline();
 
           int dayX = deadlineOne.millisecondsSinceEpoch;
           int dayY = deadlineTwo.millisecondsSinceEpoch;
 
           if (dayX.compareTo(dayY) < 0) {
-            _todos.insert(i - 1, _todos[i]);
-            _todos.removeAt(i + 1);
+            sortedTodos.insert(i - 1, sortedTodos[i]);
+            sortedTodos.removeAt(i + 1);
             runAgain = true;
           }
         }
       }
     }
+
+    return sortedTodos;
   }
 
   Future<List<Widget>> todosWidgets(List<Todo> todoList) async {
@@ -135,7 +132,7 @@ class _TodoListState extends State<TodoList> {
       widgets.add(TodoComponent(
           todo: todoList[i],
           placeInTheTodosList: i,
-          removeTodoInUi: removeFromTodoList));
+          uiUpdateTodos: uiUpdateTodos));
     }
     return widgets;
   }
@@ -151,11 +148,5 @@ class _TodoListState extends State<TodoList> {
     }
 
     return newChannels;
-  }
-
-  void removeFromTodoList(int placeInList) {
-    setState(() {
-      _todos.removeAt(placeInList);
-    });
   }
 }

@@ -5,7 +5,7 @@ import 'package:unfuckyourlife/model/database/open_databases.dart';
 import '../todo/Todo.dart';
 import 'channelClass/channel.dart';
 
-void addNewTodoToDatabase(Todo todo) async {
+Future<void> addNewTodoToDatabase(Todo todo) async {
   WidgetsFlutterBinding.ensureInitialized();
   final database = await openOurDatabase();
 
