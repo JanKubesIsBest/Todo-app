@@ -65,7 +65,11 @@ class _HomePageState extends State<HomePage> {
     getName();
     await getDefaultNotifyingTime();
 
-    checkIfTheNotifyingIsSet();
+    await checkIfTheNotifyingIsSet();
+
+    // Get needed things
+    setStateWithUpdatedChannels();
+    uiUpdateTodos();
 
     var y = await retrieveChannels();
     var x = await retrieveTodos();
@@ -89,7 +93,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void checkIfTheNotifyingIsSet() async {
+  Future<void> checkIfTheNotifyingIsSet() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("notifying") != true) {
       DateTime startNotifyingAt = DateTime(
@@ -110,11 +114,9 @@ class _HomePageState extends State<HomePage> {
       // default - now
       print(startNotifyingAt.difference(DateTime.now()).inSeconds);
 
-      createNewChannel(defaultChannel, startNotifyingAt);
+      await createNewChannel(defaultChannel, startNotifyingAt);
       prefs.setBool("notifying", true);
     }
-
-    retrieveTodosAndChannels();
   }
 
   @override
@@ -135,13 +137,25 @@ class _HomePageState extends State<HomePage> {
             child: Align(
               alignment: Alignment.bottomLeft,
               child: PageView.builder(
-                itemCount: notCustomChannelsReturnFunction().length,
+                // All Page
+                itemCount: notCustomChannelsReturnFunction().length + 1,
                 itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
                   return TodoList(
-                    channel: notCustomChannelsReturnFunction()[index],
+                    channel: Channel(0, "Does not matter what is here", 0, false),
                     todos: todos,
                     uiUpdateTodos: uiUpdateTodos,
+                    showAll: true,
+                  );  
+                  } else {
+                  return TodoList(
+                    // Add into consideration that index is + 1 because of all page
+                    channel: notCustomChannelsReturnFunction()[index - 1],
+                    todos: todos,
+                    uiUpdateTodos: uiUpdateTodos,
+                    showAll: false,
                   );
+                  }
                 },
               ),
             ),

@@ -8,11 +8,14 @@ class TodoList extends StatelessWidget {
   final List<Todo> todos;
   final Channel channel;
   final Function uiUpdateTodos;
+
+  final bool showAll;
   const TodoList(
       {super.key,
       required this.todos,
       required this.channel,
-      required this.uiUpdateTodos});
+      required this.uiUpdateTodos,
+      required this.showAll});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +23,7 @@ class TodoList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "${channel.name}: ",
+          showAll ? "All: " :  "${channel.name}: ",
           style: const TextStyle(
               color: Colors.white, fontSize: 20, fontWeight: FontWeight.w100),
         ),
@@ -31,12 +34,14 @@ class TodoList extends StatelessWidget {
             if (snapshot.hasData) {
               List<Widget> widgets = snapshot.data as List<Widget>;
 
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: widgets.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return widgets[index];
-                },
+              return Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widgets.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return widgets[index];
+                  },
+                ),
               );
             } else {
               return const Center(
@@ -54,10 +59,16 @@ class TodoList extends StatelessWidget {
     List<Todo> removedTodosAndSortedTodos = [];
 
     // First remove all todos that don't match the channel id
-    for (int x = 0; x < _todos.length; x++) {
-      if (_todos[x].channel == channel.id) {
-        removedTodosAndSortedTodos.add(_todos[x]);
+    // If you are supposed to show all don't remove anything
+    if (!showAll) {
+      for (int x = 0; x < _todos.length; x++) {
+        if (_todos[x].channel == channel.id) {
+          removedTodosAndSortedTodos.add(_todos[x]);
+        }
       }
+    } else {
+      // Just add everything
+      removedTodosAndSortedTodos = _todos;
     }
 
     // If the list is empty, return nothing
@@ -137,19 +148,5 @@ class TodoList extends StatelessWidget {
           uiUpdateTodos: uiUpdateTodos));
     }
     return widgets;
-  }
-
-  Future<List<Channel>> getChannelsInChannelClassType() async {
-    List<Map<String, dynamic>> channelsMap = await retrieveChannels();
-    List<Channel> newChannels = [Channel(0, "Custom", 0, true)];
-    for (final Map<String, dynamic> map in channelsMap) {
-      // If the channel is custom, don't add it as every custom channel is special.
-      if (map['isCustom'] != 1) {
-        newChannels
-            .add(Channel(map['id'], map['name'], map['notifier'], false));
-      }
-    }
-
-    return newChannels;
   }
 }

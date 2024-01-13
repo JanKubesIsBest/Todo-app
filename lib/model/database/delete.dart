@@ -10,6 +10,7 @@ Future<void> deleteTodo(Todo todo) async {
 
   print(todo.channel);
   print(await retrieveChannels());
+  
   // Get Channel
   List<Map<String, dynamic>> mapChannelList =
       await retrieveChannelById(todo.channel);
