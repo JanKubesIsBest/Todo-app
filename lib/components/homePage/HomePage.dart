@@ -120,7 +120,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final PageController controller = PageController();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -397,6 +396,7 @@ class _HomePageState extends State<HomePage> {
     newTodoNameController.clear();
     newTodoDescriptionController.clear();
     selectedDateForDeadline = getTomorrow();
+    notifyAt = defaultNotifyingTime;
   }
 
   DateTime getTomorrow() {

@@ -17,9 +17,9 @@ class TodoList extends StatelessWidget {
     return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Todos:",
-                    style: TextStyle(
+                  Text(
+                    "${channel.name}: ",
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.w100),
