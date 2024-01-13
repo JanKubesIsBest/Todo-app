@@ -121,10 +121,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final PageController controller = PageController();
-
-    print("BUILD TRIGGERED");
-    print(todos);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -141,15 +137,15 @@ class _HomePageState extends State<HomePage> {
             child: Align(
               alignment: Alignment.bottomLeft,
               child: PageView.builder(
-                      itemCount: notCustomChannelsReturnFunction().length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return TodoList(
-                          channel: notCustomChannelsReturnFunction()[index],
-                          todos: todos,
-                          uiUpdateTodos: uiUpdateTodos,
-                        );
-                      },
-                    ),
+                itemCount: notCustomChannelsReturnFunction().length,
+                itemBuilder: (BuildContext context, int index) {
+                  return TodoList(
+                    channel: notCustomChannelsReturnFunction()[index],
+                    todos: todos,
+                    uiUpdateTodos: uiUpdateTodos,
+                  );
+                },
+              ),
             ),
           ),
           Align(
@@ -195,12 +191,6 @@ class _HomePageState extends State<HomePage> {
     }
 
     return notCustomChannels;
-  }
-
-  void removeFromTodoList(int placeInList) {
-    setState(() {
-      todos.removeAt(placeInList);
-    });
   }
 
   Future<void> _showMyDialog() {
@@ -299,7 +289,9 @@ class _HomePageState extends State<HomePage> {
                             onSelected: (Channel? newSelectedChannel) {
                               setState(() {
                                 if (newSelectedChannel != null) {
-                                  selectedChannel = newSelectedChannel;
+                                  setState(() {
+                                    selectedChannel = newSelectedChannel;
+                                  });
                                 }
                               });
                             },
@@ -312,10 +304,10 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                             '${selectedDateForDeadline.day.toString()}.${selectedDateForDeadline.month.toString()}.${selectedDateForDeadline.year.toString()}'),
                       ),
-                      ElevatedButton(
+                      selectedChannel.isCustom ? ElevatedButton(
                         onPressed: () => selectTime(context),
                         child: Text(notifyAt.format(context)),
-                      ),
+                      ) : const SizedBox(),
                     ],
                   ),
                 ),
@@ -370,7 +362,7 @@ class _HomePageState extends State<HomePage> {
                         deadline: deadlineId,
                         channel: channelId,
                       );
-                      
+
                       await addNewTodoToDatabase(newTodo);
                       uiUpdateTodos();
 
@@ -386,12 +378,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void uiUpdateTodos() async { 
+  void uiUpdateTodos() async {
     List<Todo> retrievedTodos = await retrieveOnlyTodos();
-    print("New TODO !!!!!!!!");
-    print(retrievedTodos);
     setState(() {
       todos = retrievedTodos;
+    });
+  }
+
+  Future<void> setStateWithUpdatedChannels() async {
+    List<Channel> updatedChannel = await getChannelsInChannelClassType();
+
+    setState(() {
+      channels = updatedChannel;
     });
   }
 
@@ -409,7 +407,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> getDefaultNotifyingTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? timeInString = prefs.getString("defaultNotifyingTime");
-    print(timeInString);
+
     // Should never happen
     if (timeInString != null) {
       print("Setting notifying at");
@@ -433,7 +431,7 @@ class _HomePageState extends State<HomePage> {
 
     // Todos:
     List<Todo> retrievedTodos = await retrieveOnlyTodos();
-    
+
     setState(() {
       todos = retrievedTodos;
       channels = newChannels;
@@ -453,14 +451,6 @@ class _HomePageState extends State<HomePage> {
     return retrievedTodos;
   }
 
-  Future<void> setStateWithUpdatedChannels() async {
-    List<Channel> updatedChannel = await getChannelsInChannelClassType();
-
-    setState(() {
-      channels = updatedChannel;
-    });
-  }
-
   Future<List<Channel>> getChannelsInChannelClassType() async {
     List<Map<String, dynamic>> channelsMap = await retrieveChannels();
     List<Channel> newChannels = [Channel(0, "Custom", 0, true)];
@@ -478,7 +468,7 @@ class _HomePageState extends State<HomePage> {
 
 void askForPermissions() async {
   var status = await Permission.notification.status;
-  print(status);
+
   if (status.isDenied) {
     Permission.notification.request();
   }
