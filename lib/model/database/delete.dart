@@ -1,5 +1,10 @@
+import "package:flutter/material.dart";
+import "package:sqflite/sqflite.dart";
+import "package:unfuckyourlife/model/database/channelClass/channel.dart";
 import "package:unfuckyourlife/model/database/open_databases.dart";
 import "package:unfuckyourlife/model/database/retrieve.dart";
+import "package:unfuckyourlife/model/database/update.dart";
+import "package:unfuckyourlife/model/todo/mapToTodo.dart";
 
 import "../todo/Todo.dart";
 import '../../model/notification/notifications.dart';
@@ -18,33 +23,8 @@ Future<void> deleteTodo(Todo todo) async {
 
   // If it is custom, then delete it.
   if (channel["isCustom"] == 1) {
-    // Get the id
-    List<Map<String, dynamic>> mapNotifList =
-        await retrieveNotificationsById(todo.channel);
-    Map<String, dynamic> mapNotif = mapNotifList[0];
-
-    int notificationId = mapNotif["id"];
-
-    // Cancel the pending notif.
-    NotificationService().cancelNotification(notificationId);
-
-    // Remove notification from the database
-    await db.delete(
-      'notifications',
-      // Use a `where` clause to delete a specific T_odo.
-      where: 'id = ?',
-      // Pass the T_odo's id as a whereArg to prevent SQL injection.
-      whereArgs: [notificationId],
-    );
-
-    // Remove the custom channel
-    await db.delete(
-      'channels',
-      // Use a `where` clause to delete a specific T_odo.
-      where: 'id = ?',
-      // Pass the T_odo's id as a whereArg to prevent SQL injection.
-      whereArgs: [todo.channel],
-    );
+    // Delete channel and its notification in database as well as in Notification manager.
+    _deleteChannel(todo.channel, db);
   }
   // Todo and deadline will be removed. Does not matter if it is custom or not.
 
@@ -75,5 +55,59 @@ Future<void> deleteNotification(notificationId) async {
     where: 'id = ?',
     // Pass the T_odo's id as a whereArg to prevent SQL injection.
     whereArgs: [notificationId],
+  );
+}
+
+Future<void> deleteChannel(Channel channel,) async {
+  final db = await openOurDatabase();
+
+    // Delete channel and its notification in database as well as in Notification manager
+    await _deleteChannel(channel.id, db);
+
+    // Rebrand the todos in the channel and add them to the default
+    // TODO: Make a option to choose where to redirect the Todos
+
+    // Get Todos in channel
+    List<Map<String, dynamic>> todosInTheChannel = await retrieveTodosByChannel(channel.id);
+
+    // Update them all in the database 
+    for (final Map<String, dynamic> todoMap in todosInTheChannel) {
+      // Only thing needed is the id, which is 1 when custom
+      // TODO: Look at todo above 
+      updateTodoById(mapToTodo(todoMap), Channel(1, "name", 0, false));
+    }
+
+    // Update state to see changes
+}
+
+Future<void> _deleteChannel(int channelId, Database database) async {
+  final db = database;
+
+  // Get the id
+  List<Map<String, dynamic>> mapNotifList =
+  await retrieveNotificationsById(channelId);
+  Map<String, dynamic> mapNotif = mapNotifList[0];
+
+  int notificationId = mapNotif["id"];
+
+  // Cancel the pending notif.
+  NotificationService().cancelNotification(notificationId);
+
+  // Remove notification from the database
+  await db.delete(
+    'notifications',
+    // Use a `where` clause to delete a specific T_odo.
+    where: 'id = ?',
+    // Pass the T_odo's id as a whereArg to prevent SQL injection.
+    whereArgs: [notificationId],
+  );
+
+  // Remove the custom channel
+  await db.delete(
+    'channels',
+    // Use a `where` clause to delete a specific T_odo.
+    where: 'id = ?',
+    // Pass the T_odo's id as a whereArg to prevent SQL injection.
+    whereArgs: [channelId],
   );
 }

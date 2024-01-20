@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unfuckyourlife/components/homePage/todoComponent/todoComponent.dart';
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
-import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 
 class TodoList extends StatelessWidget {

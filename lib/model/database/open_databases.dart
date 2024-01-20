@@ -1,7 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-Future openOurDatabase() async {
+Future<Database> openOurDatabase() async {
   print("open our database");
   final database = await openDatabase(
     join(await getDatabasesPath(), 'appDatabase.db'),

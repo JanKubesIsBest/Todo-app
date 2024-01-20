@@ -1,5 +1,6 @@
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
+import 'package:unfuckyourlife/model/todo/Todo.dart';
 
 Future<void> updateChannelById(Channel newChannel) async {
   final database = await openOurDatabase();
@@ -24,5 +25,20 @@ Future<void> updateNotificationById(int id, DateTime date) async {
     where: 'id = ?',
     // Pass the Dog's id as a whereArg to prevent SQL injection.
     whereArgs: [id],
+  );
+}
+
+Future<void> updateTodoById(Todo todo, Channel newChannel) async{
+  final database = await openOurDatabase();
+
+  Todo redirectedTodo = Todo(channel: newChannel.id, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
+
+  database.update(
+    'todos',
+    redirectedTodo.toMap(),
+      // Ensure that the Dog has a matching id.
+    where: 'id = ?',
+    // Pass the Dog's id as a whereArg to prevent SQL injection.
+    whereArgs: [todo.id],
   );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
+import 'package:unfuckyourlife/model/database/delete.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/database/update.dart';
 import 'package:unfuckyourlife/model/notification/notifications.dart';
@@ -21,25 +22,54 @@ class _TodoButtonState extends State<TodoButton> {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        _showMyDialog();
-      },
-      child: Column(
-        children: [
-          Text(widget.channel.name),
-          FutureBuilder<List<Map<String, dynamic>>>(
-            future: retrieveNotificationsById(widget.channel.notification),
-            builder: ((context, snapshot) {
-              if (snapshot.hasData) {
-                return Text(
-                    "${snapshot.data![0]["hour"]}:${snapshot.data![0]["minute"]}");
-              } else {
-                return const CircularProgressIndicator();
-              }
-            }),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GestureDetector(
+        onTap: _showMyDialog,
+        child: Card(
+          color: Colors.grey,
+          child: Padding(
+            padding:
+                const EdgeInsets.only(left: 15, right: 15, top: 1, bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.channel.name,
+                        maxLines: 3,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
+                    widget.channel.id != 1 ? IconButton(
+                      onPressed: () async {
+                        // Delete channel
+                        await deleteChannel(widget.channel);
+                        // Update channels state
+                      },
+                      icon: const Icon(Icons.delete),
+                      color: const Color.fromARGB(255, 183, 14, 14),
+                    ) : const SizedBox(),
+                  ],
+                ),
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: retrieveNotificationsById(widget.channel.notification),
+                  builder: ((context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Text(
+                          "${snapshot.data![0]["hour"]}:${snapshot.data![0]["minute"]}");
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  }),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
