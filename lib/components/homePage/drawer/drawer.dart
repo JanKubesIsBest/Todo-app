@@ -75,7 +75,7 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
                       print(x.isCustom);
                       if (x.isCustom != true){
                         print("ADDDDDIDNG ");
-                        widgets.add(TodoButton(channel: x));
+                        widgets.add(TodoButton(channel: x, updateState: widget.updateChannel,));
                       }
                     }
 

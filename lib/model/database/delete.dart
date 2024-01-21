@@ -1,4 +1,3 @@
-import "package:flutter/material.dart";
 import "package:sqflite/sqflite.dart";
 import "package:unfuckyourlife/model/database/channelClass/channel.dart";
 import "package:unfuckyourlife/model/database/open_databases.dart";

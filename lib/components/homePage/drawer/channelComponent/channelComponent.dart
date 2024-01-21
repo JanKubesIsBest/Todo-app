@@ -7,8 +7,9 @@ import 'package:unfuckyourlife/model/notification/notifications.dart';
 
 class TodoButton extends StatefulWidget {
   final Channel channel;
+  final Function updateState;
 
-  const TodoButton({super.key, required this.channel});
+  const TodoButton({super.key, required this.channel, required this.updateState});
 
   @override
   State<StatefulWidget> createState() => _TodoButtonState();
@@ -49,6 +50,7 @@ class _TodoButtonState extends State<TodoButton> {
                         // Delete channel
                         await deleteChannel(widget.channel);
                         // Update channels state
+                        widget.updateState();
                       },
                       icon: const Icon(Icons.delete),
                       color: const Color.fromARGB(255, 183, 14, 14),
