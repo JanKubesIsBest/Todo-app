@@ -37,6 +37,12 @@ class _HomePageState extends State<HomePage> {
 
   Channel selectedChannel = Channel(0, "Custom", 0, true);
 
+  // Declare and initizlize the page controller
+  final PageController _pageController = PageController(initialPage: 0);
+
+  // The index of the current page
+  int activePage = 0;
+
   @override
   void initState() {
     super.initState();
@@ -137,26 +143,64 @@ class _HomePageState extends State<HomePage> {
             child: Align(
               alignment: Alignment.bottomLeft,
               child: PageView.builder(
+                // Dots
+                controller: _pageController,
+                onPageChanged: (int page) {
+                  setState(() {
+                    activePage = page;
+                  });
+                },
                 // All Page
                 itemCount: notCustomChannelsReturnFunction().length + 1,
                 itemBuilder: (BuildContext context, int index) {
                   if (index == 0) {
-                  return TodoList(
-                    channel: Channel(0, "Does not matter what is here", 0, false),
-                    todos: todos,
-                    uiUpdateTodos: uiUpdateTodos,
-                    showAll: true,
-                  );  
+                    return TodoList(
+                      channel:
+                          Channel(0, "Does not matter what is here", 0, false),
+                      todos: todos,
+                      uiUpdateTodos: uiUpdateTodos,
+                      showAll: true,
+                    );
                   } else {
-                  return TodoList(
-                    // Add into consideration that index is + 1 because of all page
-                    channel: notCustomChannelsReturnFunction()[index - 1],
-                    todos: todos,
-                    uiUpdateTodos: uiUpdateTodos,
-                    showAll: false,
-                  );
+                    return TodoList(
+                      // Add into consideration that index is + 1 because of all page
+                      channel: notCustomChannelsReturnFunction()[index - 1],
+                      todos: todos,
+                      uiUpdateTodos: uiUpdateTodos,
+                      showAll: false,
+                    );
                   }
                 },
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 100,
+            child: Container(
+              color: Colors.black54,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List<Widget>.generate(
+                    notCustomChannelsReturnFunction().length + 1,
+                        (index) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: InkWell(
+                        onTap: () {
+                          _pageController.animateToPage(index,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeIn);
+                        },
+                        child: CircleAvatar(
+                          radius: activePage == index ? 6 : 4,
+                          backgroundColor: activePage == index
+                              ? Colors.amber
+                              : Colors.grey,
+                        ),
+                      ),
+                    )),
               ),
             ),
           ),
@@ -317,10 +361,12 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                             '${selectedDateForDeadline.day.toString()}.${selectedDateForDeadline.month.toString()}.${selectedDateForDeadline.year.toString()}'),
                       ),
-                      selectedChannel.isCustom ? ElevatedButton(
-                        onPressed: () => selectTime(context),
-                        child: Text(notifyAt.format(context)),
-                      ) : const SizedBox(),
+                      selectedChannel.isCustom
+                          ? ElevatedButton(
+                              onPressed: () => selectTime(context),
+                              child: Text(notifyAt.format(context)),
+                            )
+                          : const SizedBox(),
                     ],
                   ),
                 ),
