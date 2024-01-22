@@ -53,21 +53,21 @@ class TodoList extends StatelessWidget {
     );
   }
 
-  Future<List<Widget>> sortTodosAndMakeThemWidgets(List<Todo> _todos) async {
+  Future<List<Widget>> sortTodosAndMakeThemWidgets(List<Todo> todos) async {
     // Remove Todos that are not linked to this channel
     List<Todo> removedTodosAndSortedTodos = [];
 
     // First remove all todos that don't match the channel id
     // If you are supposed to show all don't remove anything
     if (!showAll) {
-      for (int x = 0; x < _todos.length; x++) {
-        if (_todos[x].channel == channel.id) {
-          removedTodosAndSortedTodos.add(_todos[x]);
+      for (int x = 0; x < todos.length; x++) {
+        if (todos[x].channel == channel.id) {
+          removedTodosAndSortedTodos.add(todos[x]);
         }
       }
     } else {
       // Just add everything
-      removedTodosAndSortedTodos = _todos;
+      removedTodosAndSortedTodos = todos;
     }
 
     // If the list is empty, return nothing

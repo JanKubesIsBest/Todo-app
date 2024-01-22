@@ -263,14 +263,14 @@ class _MyHomePageState extends State<InitialPage>
   }
 
   Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked_s = await showTimePicker(
+    final TimeOfDay? pickedS = await showTimePicker(
       context: context,
       initialTime: defaultTimeForNotifying,
     );
 
-    if (picked_s != null && picked_s != defaultTimeForNotifying) {
+    if (pickedS != null && pickedS != defaultTimeForNotifying) {
       setState(() {
-        defaultTimeForNotifying = picked_s;
+        defaultTimeForNotifying = pickedS;
       });
       prefs.setString("defaultNotifyingTime", "${defaultTimeForNotifying.hour}/${defaultTimeForNotifying.minute}");
     }
