@@ -401,8 +401,6 @@ class _HomePageState extends State<HomePage> {
                             await NotificationService().scheduleNotification(
                           scheduledNotificationDateTime: date,
                           channel: selectedChannel,
-                          title: newTodoNameController.text,
-                          body: newTodoDescriptionController.text,
                         );
                       }
 

@@ -37,17 +37,20 @@ class NotificationService {
 
   Future<int> scheduleNotification(
       {int id = 0,
-      String? title,
-      String? body,
       String? payLoad,
       required DateTime scheduledNotificationDateTime,
       required Channel channel}) async {
-    int id = await addNewChannel(channel, scheduledNotificationDateTime);
+    final int id = await addNewChannel(channel, scheduledNotificationDateTime);
+    
+    final List<Map<String, dynamic>> listChannelMaped = await retrieveChannelById(id);
+    final Map<String, dynamic> channelMaped = listChannelMaped[0];
+
+    final Channel channelWithRightIds = Channel(channelMaped["id"], channelMaped["name"], channelMaped["notifier"], channelMaped["isCustom"] == 1 ? true : false);
     
     notificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
+        channelWithRightIds.notification,
+        channelWithRightIds.name,
+        "TODO Make description",
         tz.TZDateTime.from(scheduledNotificationDateTime, tz.local),
         await notificationDetails(),
         uiLocalNotificationDateInterpretation:
@@ -71,7 +74,8 @@ class NotificationService {
   Future<void> showDailyAtTime(
       Channel channel, DateTime startNotifying) async {
     print("show daily");
-    notificationsPlugin.periodicallyShow(channel.id, channel.name, "Repeat",
+    // Notification plugin notification is connected to notification in database
+    notificationsPlugin.periodicallyShow(channel.notification, channel.name, "Repeat",
         RepeatInterval.daily, await notificationDetails());
   }
 
@@ -80,7 +84,7 @@ class NotificationService {
   }
 
   void showNotificationNow(Channel channel) async {
-    await notificationsPlugin.show(channel.id, channel.name, "Channel", await notificationDetails());
+    await notificationsPlugin.show(channel.notification, channel.name, "Channel", await notificationDetails());
   }
 }
 
@@ -105,12 +109,9 @@ Future<Channel> createNewChannel(
 }
 
 void createPeriodicallNotificationWithTimeCalculation(Channel channel, DateTime startNotifyingAt) {
-  print("Starting timer");
-  // TODO: Check if the coresponding channel is starts at this time still.
     if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
       // Retrieve channel
     Timer(startNotifyingAt.difference(DateTime.now()), () async {
-      print("TIMER");
       List<Map<String, dynamic>> notificationMapedList = await retrieveNotificationsById(channel.notification);
 
       Map<String, dynamic> notificationMaped = notificationMapedList[0];

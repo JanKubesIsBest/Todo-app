@@ -23,7 +23,8 @@ Future<void> deleteTodo(Todo todo) async {
   // If it is custom, then delete it.
   if (channel["isCustom"] == 1) {
     // Delete channel and its notification in database as well as in Notification manager.
-    _deleteChannel(todo.channel, db);
+    _deleteChannel(Channel(channel["id"], channel["name"],
+          channel["notifier"], channel["isCustom"] == 1 ? true : false), db);
   }
   // Todo and deadline will be removed. Does not matter if it is custom or not.
 
@@ -61,7 +62,7 @@ Future<void> deleteChannel(Channel channel,) async {
   final db = await openOurDatabase();
 
     // Delete channel and its notification in database as well as in Notification manager
-    await _deleteChannel(channel.id, db);
+    await _deleteChannel(channel, db);
 
     // Rebrand the todos in the channel and add them to the default
     // TODO: Make a option to choose where to redirect the Todos
@@ -79,18 +80,11 @@ Future<void> deleteChannel(Channel channel,) async {
     // Update state to see changes
 }
 
-Future<void> _deleteChannel(int channelId, Database database) async {
+Future<void> _deleteChannel(Channel channel, Database database) async {
   final db = database;
 
-  // Get the id
-  List<Map<String, dynamic>> mapNotifList =
-  await retrieveNotificationsById(channelId);
-  Map<String, dynamic> mapNotif = mapNotifList[0];
-
-  int notificationId = mapNotif["id"];
-
   // Cancel the pending notif.
-  NotificationService().cancelNotification(notificationId);
+  NotificationService().cancelNotification(channel.notification);
 
   // Remove notification from the database
   await db.delete(
@@ -98,7 +92,7 @@ Future<void> _deleteChannel(int channelId, Database database) async {
     // Use a `where` clause to delete a specific T_odo.
     where: 'id = ?',
     // Pass the T_odo's id as a whereArg to prevent SQL injection.
-    whereArgs: [notificationId],
+    whereArgs: [channel.notification],
   );
 
   // Remove the custom channel
@@ -107,6 +101,6 @@ Future<void> _deleteChannel(int channelId, Database database) async {
     // Use a `where` clause to delete a specific T_odo.
     where: 'id = ?',
     // Pass the T_odo's id as a whereArg to prevent SQL injection.
-    whereArgs: [channelId],
+    whereArgs: [channel.id],
   );
 }
