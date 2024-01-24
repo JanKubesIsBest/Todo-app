@@ -69,9 +69,9 @@ class NotificationService {
   }
 
   Future<void> showDailyAtTime(
-      Channel channel, int id, DateTime startNotifying) async {
+      Channel channel, DateTime startNotifying) async {
     print("show daily");
-    notificationsPlugin.periodicallyShow(id, channel.name, "Repeat",
+    notificationsPlugin.periodicallyShow(channel.id, channel.name, "Repeat",
         RepeatInterval.daily, await notificationDetails());
   }
 
@@ -80,15 +80,7 @@ class NotificationService {
   }
 
   void showNotificationNow(Channel channel) async {
-    await notificationsPlugin.zonedSchedule(
-        0,
-        channel.name,
-        'scheduled body',
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
-        await notificationDetails(),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime);
+    await notificationsPlugin.show(channel.id, channel.name, "Channel", await notificationDetails());
   }
 }
 
@@ -96,32 +88,37 @@ Future<Channel> createNewChannel(
     Channel channel, DateTime startNotifyingAt) async {
 
   print("Adding new channel");
+  // This will add channel and notifier into the database
   int id = await addNewChannel(
     channel,
     startNotifyingAt,
   );
 
-  createPeriodicallNotificationWithTimeCalculation(channel, id, startNotifyingAt);
-
   List<Map<String, dynamic>> channelMapList = await retrieveChannelById(id);
   Map<String, dynamic> channelMap = channelMapList[0];
 
-  return Channel(channelMap["id"], channelMap["name"], channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false);
+  final Channel returnChannel = Channel(channelMap["id"], channelMap["name"], channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false);
+
+  createPeriodicallNotificationWithTimeCalculation(returnChannel, startNotifyingAt);
+
+  return returnChannel;
 }
 
-void createPeriodicallNotificationWithTimeCalculation(Channel channel, int id, DateTime startNotifyingAt) {
+void createPeriodicallNotificationWithTimeCalculation(Channel channel, DateTime startNotifyingAt) {
+  print("Starting timer");
   // TODO: Check if the coresponding channel is starts at this time still.
     if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
       // Retrieve channel
     Timer(startNotifyingAt.difference(DateTime.now()), () async {
+      print("TIMER");
       List<Map<String, dynamic>> notificationMapedList = await retrieveNotificationsById(channel.notification);
 
       Map<String, dynamic> notificationMaped = notificationMapedList[0];
-      
+      print(notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute);
       // I hope there is no delay...
       if (notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute) {
         NotificationService().showNotificationNow(channel);
-        NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
+        NotificationService().showDailyAtTime(channel, startNotifyingAt);
       }
     });
   } else {
@@ -138,7 +135,7 @@ void createPeriodicallNotificationWithTimeCalculation(Channel channel, int id, D
 
       if (notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute) {
         NotificationService().showNotificationNow(channel);
-        NotificationService().showDailyAtTime(channel, id, startNotifyingAt);
+        NotificationService().showDailyAtTime(channel, startNotifyingAt);
       }
     });
   }

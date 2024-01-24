@@ -153,20 +153,7 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
                 TextButton(
                   child: const Text('Create'),
                   onPressed: () async {
-                    DateTime startNotifyingAt = DateTime(
-                      DateTime.now().year,
-                      DateTime.now().month,
-                      DateTime.now().day,
-                      notifyAt.hour,
-                      notifyAt.minute,
-                    );
-
-                    // TODO: Impelement the description
-
-                    // The only thing that is needed is name and is custom, so does not matter much
-                    Channel channel =
-                        Channel(0, newChannelNameController.text, 0, false);
-                    await createNewChannel(channel, startNotifyingAt);
+                    await addNewChannel();
 
                     retrieveChannelsAndAssingThem();
 
@@ -184,7 +171,8 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
     );
   }
 
-  void addNewChannel() {
+  Future<void> addNewChannel() async {
+    print("Adding new channel");
     DateTime startNotifyingAt = DateTime(
       DateTime.now().year,
       DateTime.now().month,
@@ -193,9 +181,9 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
       notifyAt.minute,
     );
 
-    // The zeros will be set in function
+    // The only thing that is needed is name and is custom, so does not matter much
     Channel newChannel = Channel(0, newChannelNameController.text, 0, false);
 
-    createNewChannel(newChannel, startNotifyingAt);
+    await createNewChannel(newChannel, startNotifyingAt);
   }
 }

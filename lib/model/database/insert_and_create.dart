@@ -48,6 +48,7 @@ Future<int> addNewChannel(Channel channel, DateTime date,) async {
 Future<int> _insertChannel(database, Channel channel, DateTime date) async {
   var db = await database;
 
+  // Add notifier
   int databaseId = await addNewNotifier(date);
 
   return await db.insert(

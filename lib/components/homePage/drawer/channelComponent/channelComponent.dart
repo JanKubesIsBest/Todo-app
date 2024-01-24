@@ -147,7 +147,7 @@ class _TodoButtonState extends State<TodoButton> {
 
                     // Id is meant an id of a channel.
                     createPeriodicallNotificationWithTimeCalculation(
-                        widget.channel, widget.channel.id, startNotifyingAt);
+                        widget.channel, startNotifyingAt);
 
                     // Update Notification row with right time:
                     updateNotificationById(widget.channel.id, startNotifyingAt);
