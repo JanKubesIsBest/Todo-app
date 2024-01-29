@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -47,16 +48,23 @@ class NotificationService {
 
     final Channel channelWithRightIds = Channel(channelMaped["id"], channelMaped["name"], channelMaped["notifier"], channelMaped["isCustom"] == 1 ? true : false);
     
-    notificationsPlugin.zonedSchedule(
-        channelWithRightIds.notification,
-        channelWithRightIds.name,
-        "TODO Make description",
-        tz.TZDateTime.from(scheduledNotificationDateTime, tz.local),
-        await notificationDetails(),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime);
+    showNotiificationAt(channelWithRightIds, scheduledNotificationDateTime);
     // Return the id so you can then connect it with the todos database --> look into docs
     return id;
+  }
+
+  Future<void> showNotiificationAt(Channel channel, DateTime time ) async {
+        notificationsPlugin.zonedSchedule(
+        // Notification is referenced in notif table in the database
+        // This is working
+        Random().nextInt(1000000),
+        channel.name,
+        "TODO Make description",
+        tz.TZDateTime.from(time, tz.local),
+        await notificationDetails(),
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle);
   }
 
   Future<List<int>> getActiveNotifications() async {
@@ -75,16 +83,12 @@ class NotificationService {
       Channel channel, DateTime startNotifying) async {
     print("show daily");
     // Notification plugin notification is connected to notification in database
-    notificationsPlugin.periodicallyShow(channel.notification, channel.name, "Repeat",
-        RepeatInterval.daily, await notificationDetails());
+    notificationsPlugin.periodicallyShow(Random().nextInt(1000000), channel.name, "Repeat",
+        RepeatInterval.daily, await notificationDetails(),  androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle);
   }
 
   Future<void> cancelNotification(int id) async {
     await notificationsPlugin.cancel(id);
-  }
-
-  void showNotificationNow(Channel channel) async {
-    await notificationsPlugin.show(channel.notification, channel.name, "Channel", await notificationDetails());
   }
 }
 
@@ -100,7 +104,7 @@ Future<Channel> createNewChannel(
 
   List<Map<String, dynamic>> channelMapList = await retrieveChannelById(id);
   Map<String, dynamic> channelMap = channelMapList[0];
-
+  print(channelMap);
   final Channel returnChannel = Channel(channelMap["id"], channelMap["name"], channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false);
 
   createPeriodicallNotificationWithTimeCalculation(returnChannel, startNotifyingAt);
@@ -110,6 +114,7 @@ Future<Channel> createNewChannel(
 
 void createPeriodicallNotificationWithTimeCalculation(Channel channel, DateTime startNotifyingAt) {
     if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
+      print("TIMER");
       // Retrieve channel
     Timer(startNotifyingAt.difference(DateTime.now()), () async {
       List<Map<String, dynamic>> notificationMapedList = await retrieveNotificationsById(channel.notification);
@@ -118,8 +123,13 @@ void createPeriodicallNotificationWithTimeCalculation(Channel channel, DateTime 
       print(notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute);
       // I hope there is no delay...
       if (notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute) {
-        NotificationService().showNotificationNow(channel);
-        NotificationService().showDailyAtTime(channel, startNotifyingAt);
+        print("NOW MAKE THE NOTIFICATION");
+        print(tz.TZDateTime.from(DateTime.now().add(const Duration(seconds: 5)), tz.local));
+        print(tz.local);
+        print(channel.notification);
+        // This needs to be here as if it was outside of the ifstatement it would not check if the time in the database is same as the time for notif.
+        await NotificationService().showNotiificationAt(channel, DateTime.now().add(const Duration(seconds: 5)));
+        await NotificationService().showDailyAtTime(channel, startNotifyingAt);
       }
     });
   } else {
@@ -135,7 +145,7 @@ void createPeriodicallNotificationWithTimeCalculation(Channel channel, DateTime 
       Map<String, dynamic> notificationMaped = notificationMapedList[0];
 
       if (notificationMaped["hour"] == DateTime.now().hour && notificationMaped["minute"] == DateTime.now().minute) {
-        NotificationService().showNotificationNow(channel);
+        NotificationService().showNotiificationAt(channel, DateTime.now().add(const Duration(seconds: 5)));
         NotificationService().showDailyAtTime(channel, startNotifyingAt);
       }
     });
