@@ -94,7 +94,7 @@ class NotificationService {
     notificationsPlugin.show(Random().nextInt(1000000), channel.name, "Repeat", await notificationDetails(),);
     // Notification plugin notification is connected to notification in database
     notificationsPlugin.periodicallyShow(
-        Random().nextInt(1000000),
+        channel.id,
         channel.name,
         "Repeat",
         RepeatInterval.daily,
@@ -176,9 +176,6 @@ void showNotifications(int id) async {
     print(tz.local);
     print(channel.notification);
 
-    // This needs to be here as if it was outside of the ifstatement it would not check if the time in the database is same as the time for notif.
-    await NotificationService().showNotiificationAt(
-        channel, DateTime.now().add(const Duration(seconds: 5)));
     await NotificationService().showDailyAtTime(channel, DateTime.now());
   }
 }

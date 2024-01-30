@@ -184,6 +184,6 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
     // The only thing that is needed is name and is custom, so does not matter much
     Channel newChannel = Channel(0, newChannelNameController.text, 0, false);
 
-    await createNewChannel(newChannel, startNotifyingAt);
+    await createNewChannel(newChannel, startNotifyingAt); 
   }
 }
