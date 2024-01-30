@@ -79,7 +79,7 @@ Future<void> deleteChannel(Channel channel,) async {
     }
 
     // Stop timer
-    // Should be everything as the Time is connected through id of the channel.
+    // Should be everything as the Time is connected through id of the channel
     AndroidAlarmManager.cancel(channel.id);
 }
 
@@ -103,7 +103,7 @@ Future<void> _deleteChannel(Channel channel, Database database) async {
     'channels',
     // Use a `where` clause to delete a specific T_odo.
     where: 'id = ?',
-    // Pass the T_odo's id as a whereArg to prevent SQL injection.
+    // Pass the Todo's id as a whereArg to prevent SQL injection.
     whereArgs: [channel.id],
   );
 }
