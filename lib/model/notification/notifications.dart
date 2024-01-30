@@ -166,7 +166,7 @@ void showNotifications(int id) async {
       await retrieveNotificationsById(channel.notification);
   Map<String, dynamic> notificationMaped = notificationMapedList[0];
 
-  // I hope there is no delay... There should not be any
+  // I hope there is no delay... There should not be any as exact is set to true
   // Checking if the time is still the same as in the database
   if (notificationMaped["hour"] == DateTime.now().hour &&
       notificationMaped["minute"] == DateTime.now().minute) {

@@ -1,3 +1,4 @@
+import "package:android_alarm_manager_plus/android_alarm_manager_plus.dart";
 import "package:sqflite/sqflite.dart";
 import "package:unfuckyourlife/model/database/channelClass/channel.dart";
 import "package:unfuckyourlife/model/database/open_databases.dart";
@@ -77,7 +78,9 @@ Future<void> deleteChannel(Channel channel,) async {
       updateTodoById(mapToTodo(todoMap), Channel(1, "name", 0, false));
     }
 
-    // Update state to see changes
+    // Stop timer
+    // Should be everything as the Time is connected through id of the channel.
+    AndroidAlarmManager.cancel(channel.id);
 }
 
 Future<void> _deleteChannel(Channel channel, Database database) async {
