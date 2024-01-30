@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,7 +50,6 @@ class _HomePageState extends State<HomePage> {
     NotificationService().initNotification();
     tz.initializeTimeZones();
 
-    WidgetsFlutterBinding.ensureInitialized();
     asynchronusStartFunctions();
   }
 
@@ -72,6 +72,8 @@ class _HomePageState extends State<HomePage> {
     await getDefaultNotifyingTime();
 
     await checkIfTheNotifyingIsSet();
+
+    await AndroidAlarmManager.initialize();
 
     // Get needed things
     setStateWithUpdatedChannels();
