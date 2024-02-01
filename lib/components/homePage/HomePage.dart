@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/List/list.dart';
@@ -14,7 +15,8 @@ import '../../model/database/insert_and_create.dart';
 import '../../model/database/retrieve.dart';
 import '../../model/notification/notifications.dart';
 
-import "package:timezone/data/latest.dart" as tz;
+import "package:timezone/timezone.dart" as tz;
+import 'package:timezone/data/latest_all.dart' as tz;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -75,6 +77,8 @@ class _HomePageState extends State<HomePage> {
 
     await AndroidAlarmManager.initialize();
 
+    await _configureLocalTimeZone();
+    
     // Get needed things
     setStateWithUpdatedChannels();
     uiUpdateTodos();
@@ -104,25 +108,10 @@ class _HomePageState extends State<HomePage> {
   Future<void> checkIfTheNotifyingIsSet() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("notifying") != true) {
-      DateTime startNotifyingAt = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-        defaultNotifyingTime.hour,
-        defaultNotifyingTime.minute,
-      );
-
       // The only thing that is needed is name and is custom, so does not matter much
       Channel defaultChannel = Channel(0, "Default", 0, false);
 
-      // now 17 default 18 -1
-      // now - default
-      print(DateTime.now().difference(startNotifyingAt).inSeconds);
-
-      // default - now
-      print(startNotifyingAt.difference(DateTime.now()).inSeconds);
-
-      await createNewChannel(defaultChannel, startNotifyingAt);
+      await createNewChannel(defaultChannel, defaultNotifyingTime);
       prefs.setBool("notifying", true);
     }
   }
@@ -524,6 +513,12 @@ class _HomePageState extends State<HomePage> {
     }
 
     return newChannels;
+  }
+
+  Future<void> _configureLocalTimeZone() async {
+    tz.initializeTimeZones();
+    final String? timeZoneName = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZoneName!));
   }
 }
 

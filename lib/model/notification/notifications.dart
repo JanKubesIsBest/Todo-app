@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -62,7 +63,8 @@ class NotificationService {
 
   Future<void> showNotiificationAt(Channel channel, DateTime time) async {
     print("Show notif");
-    notificationsPlugin.zonedSchedule(
+
+    await notificationsPlugin.zonedSchedule(
         // Notification is referenced in notif table in the database
         // This is working
         Random().nextInt(1000000),
@@ -72,7 +74,7 @@ class NotificationService {
         await notificationDetails(),
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle);
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,);
   }
 
   Future<List<int>> getActiveNotifications() async {
@@ -91,7 +93,7 @@ class NotificationService {
   Future<void> showDailyAtTime(Channel channel, DateTime startNotifying) async {
     print("show daily");
 
-    notificationsPlugin.show(Random().nextInt(1000000), channel.name, "Repeat", await notificationDetails(),);
+    // notificationsPlugin.show(Random().nextInt(1000000), channel.name, "Repeat", await notificationDetails(),);
     // Notification plugin notification is connected to notification in database
     notificationsPlugin.periodicallyShow(
         channel.id,
@@ -108,8 +110,23 @@ class NotificationService {
 }
 
 Future<Channel> createNewChannel(
-    Channel channel, DateTime startNotifyingAt) async {
+    Channel channel, TimeOfDay notifyAt) async {
   print("Adding new channel");
+
+    DateTime startNotifyingAt = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+      notifyAt.hour,
+      notifyAt.minute,
+    );
+
+
+  // If the current time is before the start notyfing at, add one day to it.
+  if (startNotifyingAt.difference(DateTime.now()).inSeconds < 0) {
+    startNotifyingAt = startNotifyingAt.add(const Duration(days: 1));
+  }
+
   // This will add channel and notifier into the database
   int id = await addNewChannel(
     channel,
@@ -122,8 +139,15 @@ Future<Channel> createNewChannel(
   final Channel returnChannel = Channel(channelMap["id"], channelMap["name"],
       channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false);
 
+
+  print("Timer");
+  print(startNotifyingAt);
   createPeriodicallNotificationWithTimeCalculation(
       returnChannel, startNotifyingAt);
+
+  // Schedule notification
+  print("Scheduling notification");
+  NotificationService().showNotiificationAt(returnChannel, startNotifyingAt);
 
   return returnChannel;
 }
@@ -131,23 +155,11 @@ Future<Channel> createNewChannel(
 Future<void> createPeriodicallNotificationWithTimeCalculation(
     Channel channel, DateTime startNotifyingAt) async {
   var sucess = await AndroidAlarmManager.initialize();
-  if (DateTime.now().difference(startNotifyingAt).inSeconds < 0) {
-    print("TIMER");
-    print(startNotifyingAt);
-    print(sucess);
-
-    await AndroidAlarmManager.oneShotAt(startNotifyingAt, channel.id, showNotifications,
-        allowWhileIdle: true, exact: true);
-  } else {
-    print("TIMER");
-    print(startNotifyingAt);
-    print(sucess);
-
-    // Because channel is selecting only time, we need to add one day if its before now
-    await AndroidAlarmManager.oneShotAt(startNotifyingAt.add(const Duration(days: 1)), channel.id, showNotifications,
-        allowWhileIdle: true, exact: true);
+  
+  print(startNotifyingAt);
+  await AndroidAlarmManager.oneShotAt(startNotifyingAt, channel.id, showNotifications,
+    allowWhileIdle: true, exact: true);
   }
-}
 
 // Id is an channel id, which is also name of the timer
 void showNotifications(int id) async {
