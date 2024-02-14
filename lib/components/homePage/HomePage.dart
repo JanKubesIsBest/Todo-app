@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unfuckyourlife/components/homePage/List/list.dart';
 import 'package:unfuckyourlife/components/homePage/drawer/drawer.dart';
+import 'package:unfuckyourlife/model/Recuring/recuring.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 
@@ -37,7 +38,8 @@ class _HomePageState extends State<HomePage> {
   late TimeOfDay notifyAt;
 
   bool isRecuring = false;
-  Duration durationOfRecuring = const Duration(days: 1);
+  final List<RecuringDurationWithName> recuringOptions = [const RecuringDurationWithName(name: "Every 10 seconds", durationOfRecuring: Duration(seconds: 10)), const RecuringDurationWithName(name: "Hourly", durationOfRecuring: Duration(hours: 1)), const RecuringDurationWithName(name: "Daily", durationOfRecuring: Duration(days: 1)), const RecuringDurationWithName(name: "Weekly", durationOfRecuring: Duration(days: 7))];
+  RecuringDurationWithName recuringDuration = const RecuringDurationWithName(name: "Daily", durationOfRecuring: Duration(days: 1));
 
   List<Channel> channels = [Channel(0, "Custom", 0, true)];
 
@@ -361,6 +363,30 @@ class _HomePageState extends State<HomePage> {
                               child: Text(notifyAt.format(context)),
                             )
                           : const SizedBox(),
+                      Row(
+                        children: [
+                          const Text("Is recuring: ", style: TextStyle(color: Colors.white),),
+                          Switch(value: isRecuring, onChanged: (bool value) => {
+                            setState(() {
+                              isRecuring = value;
+                            })
+                          }),
+                        ],
+                      ),
+                      isRecuring ? DropdownMenu<RecuringDurationWithName>(
+                            dropdownMenuEntries: recuringOptions.map((RecuringDurationWithName e) => DropdownMenuEntry(value: e, label: e.name)).toList(),
+                            initialSelection: recuringDuration,
+                            onSelected: (RecuringDurationWithName? newSelectedChannel) {
+                              setState(() {
+                                if (newSelectedChannel != null) {
+                                  setState(() {
+                                    recuringDuration = newSelectedChannel;
+                                  });
+                                }
+                              });
+                            },
+                            textStyle: const TextStyle(color: Colors.grey),
+                          ) : const SizedBox(),
                     ],
                   ),
                 ),
@@ -405,7 +431,7 @@ class _HomePageState extends State<HomePage> {
                           selectedDateForDeadline.month,
                           selectedDateForDeadline.day,
                         ),
-                      );
+                      );  
 
                       final newTodo = Todo(
                         name: newTodoNameController.value.text,
@@ -414,7 +440,7 @@ class _HomePageState extends State<HomePage> {
                         deadline: deadlineId,
                         channel: channelId,
                         isRecuring: isRecuring,
-                        durationOfRecuring: durationOfRecuring.inSeconds,
+                        durationOfRecuring: recuringDuration.durationOfRecuring.inSeconds,
                       );
 
                       await addNewTodoToDatabase(newTodo);
