@@ -1,5 +1,3 @@
-import 'package:unfuckyourlife/model/database/retrieve.dart';
-
 class RecuringDurationWithName {
   // Id is assigned automatically
   final String name;

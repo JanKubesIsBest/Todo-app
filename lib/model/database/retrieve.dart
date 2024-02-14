@@ -6,6 +6,13 @@ Future<List<Map<String, dynamic>>> retrieveTodos() async {
   return maps;
 }
 
+Future<List<Map<String, dynamic>>> retrieveTodosById(int id) async {
+  print("retriving todos");
+  final database = await openOurDatabase();
+  final List<Map<String, dynamic>> maps = await database.query('todos', where: 'id = ?', whereArgs: [id]);
+  return maps;
+}
+
 Future<List<Map<String, dynamic>>> retrieveTodosByChannel(int channelId) async {
   print("retriving todos");
   final database = await openOurDatabase();

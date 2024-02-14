@@ -407,6 +407,7 @@ class _HomePageState extends State<HomePage> {
                       // If the the custom option is selected, you always make new channels that have custom attributes
                       int channelId = selectedChannel.id;
 
+                      // Is recuring is handled in addNewTodoFunction
                       if (selectedChannel.isCustom == true) {
                         print("Custom !!!!!!");
                         DateTime date = DateTime(
@@ -443,6 +444,7 @@ class _HomePageState extends State<HomePage> {
                         durationOfRecuring: recuringDuration.durationOfRecuring.inSeconds,
                       );
 
+                      // Is recuring is handled in addNewTodoFunction
                       await addNewTodoToDatabase(newTodo);
                       uiUpdateTodos();
 

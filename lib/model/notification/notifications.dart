@@ -4,9 +4,13 @@ import 'dart:math';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:unfuckyourlife/model/database/open_databases.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
+import 'package:unfuckyourlife/model/todo/Todo.dart';
+import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 
 import '../database/channelClass/channel.dart';
 import '../database/insert_and_create.dart';
@@ -192,4 +196,53 @@ void showNotifications(int id) async {
 
     await NotificationService().showDailyAtTime(channel, DateTime.now());
   }
+}
+
+Future<void> periodicallyShowTodo(Todo todo) async { 
+  var sucess = await AndroidAlarmManager.initialize();
+
+  print("One shot at ${todo.durationOfRecuring}");
+
+  DateTime deadline = await todo.getDeadline();
+
+  // todo.id as int should be okay, as I'm asigning it in the _insertTodo function.
+  // deadline.difference(DateTime.now()).inSeconds solves the next day problem, as to the duration is also added the difference between now and deadline
+  AndroidAlarmManager.oneShot(Duration(seconds: todo.durationOfRecuring + (deadline.difference(DateTime.now()).inSeconds)), todo.id as int, addNewTodoThatIsRecuring, allowWhileIdle: true, exact: true);
+}
+
+void addNewTodoThatIsRecuring(int id) async {
+  // Retriving channel
+  List<Map<String, dynamic>> todosList = await retrieveTodosById(id);
+  Map<String, dynamic> todoMap = todosList[0];
+  final Todo todo = mapToTodo(todoMap);
+
+  // Scenario for custom is not done yet
+  
+  // Retrieving deadline
+  DateTime deadline = await todo.getDeadline();
+
+  // add new deadline
+  int deadlineId = await addNewDeadline(
+    DateTime(
+      deadline.year,
+      deadline.month,
+      deadline.day,
+    ).add(Duration(seconds: todo.durationOfRecuring)),
+  );  
+  
+
+  Todo newTodo = Todo(durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: deadlineId);
+
+  // Get a reference to the database.
+  final db = await openOurDatabase();
+
+  int todoInsertedId = await db.insert(
+    'todos',
+    newTodo.toMap(),
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+
+  Todo newTodoWithRightId = Todo(id: todoInsertedId, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: deadlineId);
+
+  periodicallyShowTodo(newTodoWithRightId);
 }

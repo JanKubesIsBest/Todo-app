@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
+import 'package:unfuckyourlife/model/notification/notifications.dart';
 
 import '../todo/Todo.dart';
 import 'channelClass/channel.dart';
@@ -17,11 +18,17 @@ Future<void> _insertTodo(database, Todo todo) async {
   print("inserting todo");
   // Get a reference to the database.
   var db = await database;
-  await db.insert(
+  int todoInsertedId = await db.insert(
     'todos',
     todo.toMap(),
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
+
+  // If is recuring, set timerTo make this call again
+  if (todo.isRecuring) {
+    Todo newTodo = Todo(id: todoInsertedId, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
+    periodicallyShowTodo(newTodo);
+  }
 }
 
 Future<int> addNewNotifier( DateTime date) async {
