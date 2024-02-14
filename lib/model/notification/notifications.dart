@@ -156,7 +156,9 @@ Future<void> createPeriodicallNotificationWithTimeCalculation(
     Channel channel, DateTime startNotifyingAt) async {
   var sucess = await AndroidAlarmManager.initialize();
   
+  print("AndroidAlarmManager initilized sucessfully: $sucess");
   print(startNotifyingAt);
+  
   await AndroidAlarmManager.oneShotAt(startNotifyingAt, channel.id, showNotifications,
     allowWhileIdle: true, exact: true);
   }

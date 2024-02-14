@@ -36,6 +36,9 @@ class _HomePageState extends State<HomePage> {
   late TimeOfDay defaultNotifyingTime;
   late TimeOfDay notifyAt;
 
+  bool isRecuring = false;
+  Duration durationOfRecuring = const Duration(days: 1);
+
   List<Channel> channels = [Channel(0, "Custom", 0, true)];
 
   Channel selectedChannel = Channel(0, "Custom", 0, true);
@@ -410,6 +413,8 @@ class _HomePageState extends State<HomePage> {
                         created: DateTime.now(),
                         deadline: deadlineId,
                         channel: channelId,
+                        isRecuring: isRecuring,
+                        durationOfRecuring: durationOfRecuring.inSeconds,
                       );
 
                       await addNewTodoToDatabase(newTodo);

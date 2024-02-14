@@ -21,7 +21,8 @@ Future<Database> openOurDatabase() async {
 Future<void> createTodoTable(Database db) {
   print("Todos created");
   return db.execute(
-    'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING, channelId INT, deadlineId int)',
+    // Bools are in Ints, as you can't do bool in mySQL database, instead you make 0 or 1
+    'CREATE TABLE todos(id INTEGER PRIMARY KEY, name TEXT, description TEXT, created STRING, channelId INT, deadlineId int, isRecuring int, durationOfRecuring int)',
   );
 }
 

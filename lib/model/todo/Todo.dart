@@ -8,9 +8,13 @@ class Todo {
   final DateTime created;
   final int deadline;
   final int channel;
+  final bool isRecuring;
+  final int durationOfRecuring;
 
   // Id is not required, bcs we don't even use it when building components.
   const Todo({
+    required this.durationOfRecuring, 
+    required this.isRecuring, 
     required this.channel,
     required this.created,
     required this.name,
@@ -27,6 +31,8 @@ class Todo {
       'created': created.toIso8601String(),
       'deadlineId': deadline,
       'channelId': channel,
+      'isRecuring': isRecuring ? 1 : 0,
+      'durationOfRecuring': durationOfRecuring,
     };
   }
 
