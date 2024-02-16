@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
 
     await AndroidAlarmManager.initialize();
 
-    await _configureLocalTimeZone();
+    await configureLocalTimeZone();
     
     // Get needed things
     setStateWithUpdatedChannels();
@@ -547,12 +547,6 @@ class _HomePageState extends State<HomePage> {
 
     return newChannels;
   }
-
-  Future<void> _configureLocalTimeZone() async {
-    tz.initializeTimeZones();
-    final String? timeZoneName = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(timeZoneName!));
-  }
 }
 
 void askForPermissions() async {
@@ -561,4 +555,10 @@ void askForPermissions() async {
   if (status.isDenied) {
     Permission.notification.request();
   }
+}
+
+Future<void> configureLocalTimeZone() async {
+  tz.initializeTimeZones();
+  final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+  tz.setLocalLocation(tz.getLocation(timeZoneName));
 }

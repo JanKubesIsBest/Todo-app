@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:unfuckyourlife/components/homePage/HomePage.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
@@ -50,15 +51,7 @@ class NotificationService {
       required Channel channel}) async {
     final int id = await addNewChannel(channel, scheduledNotificationDateTime);
 
-    final List<Map<String, dynamic>> listChannelMaped =
-        await retrieveChannelById(id);
-    final Map<String, dynamic> channelMaped = listChannelMaped[0];
-
-    final Channel channelWithRightIds = Channel(
-        channelMaped["id"],
-        channelMaped["name"],
-        channelMaped["notifier"],
-        channelMaped["isCustom"] == 1 ? true : false);
+    final Channel channelWithRightIds = await getChannel(id);
 
     showNotiificationAt(channelWithRightIds, scheduledNotificationDateTime);
     // Return the id so you can then connect it with the todos database --> look into docs
@@ -68,17 +61,20 @@ class NotificationService {
   Future<void> showNotiificationAt(Channel channel, DateTime time) async {
     print("Show notif");
 
+    await configureLocalTimeZone();
+
     await notificationsPlugin.zonedSchedule(
-        // Notification is referenced in notif table in the database
-        // This is working
-        Random().nextInt(1000000),
-        channel.name,
-        "TODO Make description",
-        tz.TZDateTime.from(time, tz.local),
-        await notificationDetails(),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,);
+      // Notification is referenced in notif table in the database
+      // This is working
+      Random().nextInt(1000000),
+      channel.name,
+      "TODO Make description",
+      tz.TZDateTime.from(time, tz.local),
+      await notificationDetails(),
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
   }
 
   Future<List<int>> getActiveNotifications() async {
@@ -94,18 +90,15 @@ class NotificationService {
     return notifId;
   }
 
-  Future<void> showDailyAtTime(Channel channel, DateTime startNotifying) async {
-    print("show daily");
+  Future<List<int>> getPendingNotifications() async {
+    List<PendingNotificationRequest> notifications =
+        await notificationsPlugin.pendingNotificationRequests();
 
-    // notificationsPlugin.show(Random().nextInt(1000000), channel.name, "Repeat", await notificationDetails(),);
-    // Notification plugin notification is connected to notification in database
-    notificationsPlugin.periodicallyShow(
-        channel.id,
-        channel.name,
-        "Repeat",
-        RepeatInterval.daily,
-        await notificationDetails(),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle);
+    List<int> notifId = [];
+    for (PendingNotificationRequest notif in notifications) {
+      notifId.add(notif.id);
+    }
+    return notifId;
   }
 
   Future<void> cancelNotification(int id) async {
@@ -113,18 +106,29 @@ class NotificationService {
   }
 }
 
-Future<Channel> createNewChannel(
-    Channel channel, TimeOfDay notifyAt) async {
+Future<void> showDailyAtTime(int id) async {
+  final Channel channel = await getChannel(id);
+  var sucess = await AndroidAlarmManager.initialize();
+
+  await NotificationService()
+      .showNotiificationAt(channel, DateTime.now().add(Duration(seconds: 5)));
+
+  await AndroidAlarmManager.oneShot(
+      const Duration(days: 1), channel.id, showDailyAtTime,
+      allowWhileIdle: true, exact: true);
+}
+
+// Creating channel
+Future<Channel> createNewChannel(Channel channel, TimeOfDay notifyAt) async {
   print("Adding new channel");
 
-    DateTime startNotifyingAt = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-      notifyAt.hour,
-      notifyAt.minute,
-    );
-
+  DateTime startNotifyingAt = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+    notifyAt.hour,
+    notifyAt.minute,
+  );
 
   // If the current time is before the start notyfing at, add one day to it.
   if (startNotifyingAt.difference(DateTime.now()).inSeconds < 0) {
@@ -139,45 +143,31 @@ Future<Channel> createNewChannel(
 
   List<Map<String, dynamic>> channelMapList = await retrieveChannelById(id);
   Map<String, dynamic> channelMap = channelMapList[0];
-  print(channelMap);
+
   final Channel returnChannel = Channel(channelMap["id"], channelMap["name"],
       channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false);
 
-
-  print("Timer");
-  print(startNotifyingAt);
   createPeriodicallNotificationWithTimeCalculation(
       returnChannel, startNotifyingAt);
-
-  // Schedule notification
-  print("Scheduling notification");
-  NotificationService().showNotiificationAt(returnChannel, startNotifyingAt);
 
   return returnChannel;
 }
 
+// Oneshot at for channel
 Future<void> createPeriodicallNotificationWithTimeCalculation(
     Channel channel, DateTime startNotifyingAt) async {
   var sucess = await AndroidAlarmManager.initialize();
-  
-  print("AndroidAlarmManager initilized sucessfully: $sucess");
-  print(startNotifyingAt);
-  
-  await AndroidAlarmManager.oneShotAt(startNotifyingAt, channel.id, showNotifications,
-    allowWhileIdle: true, exact: true);
-  }
 
+  await AndroidAlarmManager.oneShotAt(
+      startNotifyingAt, channel.id, showNotifications,
+      allowWhileIdle: true, exact: true);
+}
+
+// Callback function for channel notification.
 // Id is an channel id, which is also name of the timer
 void showNotifications(int id) async {
-  // I don't know why I have to intialize this
-  initializeTimeZones();
-  print("hi");
-
   // Retriving channel
-  List<Map<String, dynamic>> channelMapList = await retrieveChannelById(id);
-  Map<String, dynamic> channelMap = channelMapList[0];
-  final Channel channel = Channel(channelMap["id"], channelMap["name"],
-      channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false);
+  final Channel channel = await getChannel(id);
 
   // Retriving notification for notification time using retrieved channel id
   List<Map<String, dynamic>> notificationMapedList =
@@ -188,28 +178,12 @@ void showNotifications(int id) async {
   // Checking if the time is still the same as in the database
   if (notificationMaped["hour"] == DateTime.now().hour &&
       notificationMaped["minute"] == DateTime.now().minute) {
-    print("NOW MAKE THE NOTIFICATION");
-    print(tz.TZDateTime.from(
-        DateTime.now().add(const Duration(seconds: 5)), tz.local));
-    print(tz.local);
-    print(channel.notification);
-
-    await NotificationService().showDailyAtTime(channel, DateTime.now());
+    await showDailyAtTime(channel.id);
   }
 }
 
-Future<void> periodicallyShowTodo(Todo todo) async { 
-  var sucess = await AndroidAlarmManager.initialize();
-
-  print("One shot at ${todo.durationOfRecuring}");
-
-  DateTime deadline = await todo.getDeadline();
-
-  // todo.id as int should be okay, as I'm asigning it in the _insertTodo function.
-  // deadline.difference(DateTime.now()).inSeconds solves the next day problem, as to the duration is also added the difference between now and deadline
-  AndroidAlarmManager.oneShot(Duration(seconds: todo.durationOfRecuring + (deadline.difference(DateTime.now()).inSeconds)), todo.id as int, addNewTodoThatIsRecuring, allowWhileIdle: true, exact: true);
-}
-
+// Create recuring todo
+// Also a comeback for recuring Todo.
 void addNewTodoThatIsRecuring(int id) async {
   // Retriving channel
   List<Map<String, dynamic>> todosList = await retrieveTodosById(id);
@@ -217,7 +191,7 @@ void addNewTodoThatIsRecuring(int id) async {
   final Todo todo = mapToTodo(todoMap);
 
   // Scenario for custom is not done yet
-  
+
   // Retrieving deadline
   DateTime deadline = await todo.getDeadline();
 
@@ -228,10 +202,16 @@ void addNewTodoThatIsRecuring(int id) async {
       deadline.month,
       deadline.day,
     ).add(Duration(seconds: todo.durationOfRecuring)),
-  );  
-  
+  );
 
-  Todo newTodo = Todo(durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: deadlineId);
+  Todo newTodo = Todo(
+      durationOfRecuring: todo.durationOfRecuring,
+      isRecuring: todo.isRecuring,
+      channel: todo.channel,
+      created: todo.created,
+      name: todo.name,
+      description: todo.description,
+      deadline: deadlineId);
 
   // Get a reference to the database.
   final db = await openOurDatabase();
@@ -242,7 +222,46 @@ void addNewTodoThatIsRecuring(int id) async {
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
 
-  Todo newTodoWithRightId = Todo(id: todoInsertedId, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: deadlineId);
+  Todo newTodoWithRightId = Todo(
+      id: todoInsertedId,
+      durationOfRecuring: todo.durationOfRecuring,
+      isRecuring: todo.isRecuring,
+      channel: todo.channel,
+      created: todo.created,
+      name: todo.name,
+      description: todo.description,
+      deadline: deadlineId);
 
   periodicallyShowTodo(newTodoWithRightId);
+}
+
+// Recuring oneshot function
+Future<void> periodicallyShowTodo(Todo todo) async {
+  var sucess = await AndroidAlarmManager.initialize();
+
+  print("One shot at ${todo.durationOfRecuring}");
+
+  DateTime deadline = await todo.getDeadline();
+
+  // todo.id as int should be okay, as I'm asigning it in the _insertTodo function.
+  // deadline.difference(DateTime.now()).inSeconds solves the next day problem, as to the duration is also added the difference between now and deadline
+  await AndroidAlarmManager.oneShot(
+      Duration(
+          seconds: todo.durationOfRecuring +
+              (deadline.difference(DateTime.now()).inSeconds)),
+      todo.id as int,
+      addNewTodoThatIsRecuring,
+      allowWhileIdle: true,
+      exact: true);
+}
+
+Future<Channel> getChannel(int id) async {
+  final List<Map<String, dynamic>> listChannelMaped =
+      await retrieveChannelById(id);
+  final Map<String, dynamic> channelMaped = listChannelMaped[0];
+
+  final Channel channel = Channel(channelMaped["id"], channelMaped["name"],
+      channelMaped["notifier"], channelMaped["isCustom"] == 1 ? true : false);
+
+  return channel;
 }
