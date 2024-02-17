@@ -5,7 +5,6 @@ import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:unfuckyourlife/components/homePage/HomePage.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
@@ -40,7 +39,7 @@ class NotificationService {
   notificationDetails() {
     return const NotificationDetails(
         android: AndroidNotificationDetails('channelId', 'channelName',
-            importance: Importance.high),
+            importance: Importance.high, icon: '@mipmap/ic_launcher'),
         iOS: DarwinNotificationDetails());
   }
 
@@ -57,7 +56,8 @@ class NotificationService {
     // Return the id so you can then connect it with the todos database --> look into docs
     return id;
   }
-
+  
+  @pragma("vm:entry-point")
   Future<void> showNotiificationAt(Channel channel, DateTime time) async {
     print("Show notif");
 
@@ -77,8 +77,8 @@ class NotificationService {
     );
   }
 
-  Future<List<int>> getActiveNotifications() async {
-    List<PendingNotificationRequest> notifications =
+  Future<List<int>>? getActiveNotifications() async {
+    List<PendingNotificationRequest>? notifications =
         await notificationsPlugin.pendingNotificationRequests();
 
     List<int> notifId = [];
@@ -106,6 +106,7 @@ class NotificationService {
   }
 }
 
+@pragma("vm:entry-point")
 Future<void> showDailyAtTime(int id) async {
   final Channel channel = await getChannel(id);
   var sucess = await AndroidAlarmManager.initialize();
@@ -165,6 +166,7 @@ Future<void> createPeriodicallNotificationWithTimeCalculation(
 
 // Callback function for channel notification.
 // Id is an channel id, which is also name of the timer
+@pragma("vm:entry-point")
 void showNotifications(int id) async {
   // Retriving channel
   final Channel channel = await getChannel(id);
@@ -255,6 +257,7 @@ Future<void> periodicallyShowTodo(Todo todo) async {
       exact: true);
 }
 
+@pragma("vm:entry-point")
 Future<Channel> getChannel(int id) async {
   final List<Map<String, dynamic>> listChannelMaped =
       await retrieveChannelById(id);

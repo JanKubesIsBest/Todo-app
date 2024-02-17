@@ -92,13 +92,11 @@ class _HomePageState extends State<HomePage> {
     var x = await retrieveTodos();
     var z = await retrieveDeadlines();
     var i = await retrieveNotifications();
-    var m = await NotificationService().getActiveNotifications();
 
     print("Channels: ${y}");
     print("Todos: ${x}");
     print("deadlines:  ${z}");
     print("notifications:  ${i}");
-    print("Pending notifications:  ${m}");
   }
 
   void getName() async {
