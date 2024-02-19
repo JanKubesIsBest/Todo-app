@@ -1,3 +1,4 @@
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
 import 'package:unfuckyourlife/model/database/delete.dart';
@@ -136,6 +137,10 @@ class _TodoButtonState extends State<TodoButton> {
                     // Delete the notification
                     NotificationService()
                         .cancelNotification(widget.channel.notification);
+                    // Delete periodic timer manager 
+                    AndroidAlarmManager.initialize();
+                    AndroidAlarmManager.cancel(widget.channel.id);
+                    
                     // Reschedule it
                     DateTime startNotifyingAt = DateTime(
                       DateTime.now().year,

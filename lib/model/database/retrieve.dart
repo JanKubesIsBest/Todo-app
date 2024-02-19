@@ -1,4 +1,6 @@
 import 'package:unfuckyourlife/model/database/open_databases.dart';
+
+@pragma("vm:entry-point")
 Future<List<Map<String, dynamic>>> retrieveTodos() async {
   print("retriving todos");
   final database = await openOurDatabase();

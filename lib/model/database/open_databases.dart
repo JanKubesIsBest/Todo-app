@@ -1,6 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+@pragma("vm:entry-point")
 Future<Database> openOurDatabase() async {
   print("open our database");
   final database = await openDatabase(

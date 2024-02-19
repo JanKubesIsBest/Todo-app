@@ -106,19 +106,6 @@ class NotificationService {
   }
 }
 
-@pragma("vm:entry-point")
-Future<void> showDailyAtTime(int id) async {
-  final Channel channel = await getChannel(id);
-  var sucess = await AndroidAlarmManager.initialize();
-
-  await NotificationService()
-      .showNotiificationAt(channel, DateTime.now().add(Duration(seconds: 5)));
-
-  await AndroidAlarmManager.oneShot(
-      const Duration(days: 1), channel.id, showDailyAtTime,
-      allowWhileIdle: true, exact: true);
-}
-
 // Creating channel
 Future<Channel> createNewChannel(Channel channel, TimeOfDay notifyAt) async {
   print("Adding new channel");
@@ -159,29 +146,16 @@ Future<void> createPeriodicallNotificationWithTimeCalculation(
     Channel channel, DateTime startNotifyingAt) async {
   var sucess = await AndroidAlarmManager.initialize();
 
-  await AndroidAlarmManager.oneShotAt(
-      startNotifyingAt, channel.id, showNotifications,
-      allowWhileIdle: true, exact: true);
+  await AndroidAlarmManager.periodic(const Duration(days: 1), channel.id, showNotifChannel,
+      allowWhileIdle: true, exact: true, startAt: startNotifyingAt);
 }
 
-// Callback function for channel notification.
-// Id is an channel id, which is also name of the timer
 @pragma("vm:entry-point")
-void showNotifications(int id) async {
-  // Retriving channel
+Future<void> showNotifChannel(int id) async {
   final Channel channel = await getChannel(id);
-
-  // Retriving notification for notification time using retrieved channel id
-  List<Map<String, dynamic>> notificationMapedList =
-      await retrieveNotificationsById(channel.notification);
-  Map<String, dynamic> notificationMaped = notificationMapedList[0];
-
-  // I hope there is no delay... There should not be any as exact is set to true
-  // Checking if the time is still the same as in the database
-  if (notificationMaped["hour"] == DateTime.now().hour &&
-      notificationMaped["minute"] == DateTime.now().minute) {
-    await showDailyAtTime(channel.id);
-  }
+  
+  await NotificationService()
+      .showNotiificationAt(channel, DateTime.now().add(Duration(seconds: 5)));
 }
 
 // Create recuring todo
