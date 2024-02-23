@@ -187,8 +187,6 @@ Future<void> makeNewRecuringTodo(int id) async {
   List<Map<String, dynamic>> todosList = await retrieveTodosById(id);
   Map<String, dynamic> todoMap = todosList[0];
   final Todo todo = mapToTodo(todoMap);
-  
-  final Todo newTodo = new Todo(durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
 
   // Only channel id is needed.
   updateTodoById(todo, Channel(todo.channel, "Name", 0, false));
@@ -222,7 +220,9 @@ void addNewTodoThatIsRecuring(int id) async {
       created: todo.created,
       name: todo.name,
       description: todo.description,
-      deadline: deadlineId);
+      deadline: deadlineId,
+      done: todo.done,
+      );
 
   // Get a reference to the database.
   final db = await openOurDatabase();
@@ -233,6 +233,7 @@ void addNewTodoThatIsRecuring(int id) async {
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
 
+  // TODO: Make this work
   Todo newTodoWithRightId = Todo(
       id: todoInsertedId,
       durationOfRecuring: todo.durationOfRecuring,
@@ -241,7 +242,9 @@ void addNewTodoThatIsRecuring(int id) async {
       created: todo.created,
       name: todo.name,
       description: todo.description,
-      deadline: deadlineId);
+      deadline: deadlineId,
+      done: todo.done,
+      );
 
   periodicallyShowTodo(newTodoWithRightId);
 }

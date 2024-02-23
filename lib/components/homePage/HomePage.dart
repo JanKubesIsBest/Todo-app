@@ -440,6 +440,7 @@ class _HomePageState extends State<HomePage> {
                         channel: channelId,
                         isRecuring: isRecuring,
                         durationOfRecuring: recuringDuration.durationOfRecuring.inSeconds,
+                        done: false,
                       );
 
                       // Is recuring is handled in addNewTodoFunction

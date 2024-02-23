@@ -31,7 +31,7 @@ Future<void> updateNotificationById(int id, DateTime date) async {
 Future<void> updateTodoById(Todo todo, Channel newChannel) async{
   final database = await openOurDatabase();
 
-  Todo redirectedTodo = Todo(channel: newChannel.id, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline, isRecuring: todo.isRecuring, durationOfRecuring: todo.durationOfRecuring);
+  Todo redirectedTodo = Todo(channel: newChannel.id, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline, isRecuring: todo.isRecuring, durationOfRecuring: todo.durationOfRecuring, done: todo.done);
 
   database.update(
     'todos',

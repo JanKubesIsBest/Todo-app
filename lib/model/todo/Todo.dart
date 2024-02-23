@@ -12,8 +12,11 @@ class Todo {
   /// In seconds
   final int durationOfRecuring;
 
+  final bool done;
+
   // Id is not required, bcs we don't even use it when building components.
   const Todo({
+    required this.done, 
     required this.durationOfRecuring, 
     required this.isRecuring, 
     required this.channel,
@@ -34,6 +37,7 @@ class Todo {
       'channelId': channel,
       'isRecuring': isRecuring ? 1 : 0,
       'durationOfRecuring': durationOfRecuring,
+      'done': done ? 1 : 0,
     };
   }
 

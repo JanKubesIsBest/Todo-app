@@ -26,7 +26,7 @@ Future<void> _insertTodo(database, Todo todo) async {
 
   // If is recuring, set timerTo make this call again
   if (todo.isRecuring) {
-    Todo newTodo = Todo(id: todoInsertedId, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
+    Todo newTodo = Todo(id: todoInsertedId, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline, done: todo.done);
     periodicallyShowTodo(newTodo);
   }
 }
