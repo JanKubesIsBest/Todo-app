@@ -71,8 +71,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void asynchronusStartFunctions() async {
-    print(NotificationService().getActiveNotifications());
-
     askForPermissions();
 
     getName();
@@ -440,7 +438,7 @@ class _HomePageState extends State<HomePage> {
                         channel: channelId,
                         isRecuring: isRecuring,
                         durationOfRecuring: recuringDuration.durationOfRecuring.inSeconds,
-                        done: false,
+                        done: true,
                       );
 
                       // Is recuring is handled in addNewTodoFunction
@@ -504,20 +502,6 @@ class _HomePageState extends State<HomePage> {
       // Default
       defaultNotifyingTime = const TimeOfDay(hour: 12, minute: 0);
     }
-  }
-
-  Future<void> retrieveTodosAndChannels() async {
-    print("Retriving");
-    // Channels:
-    List<Channel> newChannels = await getChannelsInChannelClassType();
-
-    // Todos:
-    List<Todo> retrievedTodos = await retrieveOnlyTodos();
-
-    setState(() {
-      todos = retrievedTodos;
-      channels = newChannels;
-    });
   }
 
   Future<List<Todo>> retrieveOnlyTodos() async {

@@ -61,13 +61,17 @@ class TodoList extends StatelessWidget {
     // If you are supposed to show all don't remove anything
     if (!showAll) {
       for (int x = 0; x < todos.length; x++) {
-        if (todos[x].channel == channel.id) {
+        if (todos[x].channel == channel.id && !todos[x].done) {
           removedTodosAndSortedTodos.add(todos[x]);
         }
       }
     } else {
-      // Just add everything
-      removedTodosAndSortedTodos = todos;
+      // Just add everything, which is not done!!!!
+      for (int x = 0; x < todos.length; x++) {
+        if (!todos[x].done) {
+          removedTodosAndSortedTodos.add(todos[x]);
+        }
+      }
     }
 
     // If the list is empty, return nothing
@@ -114,8 +118,6 @@ class TodoList extends StatelessWidget {
 
     bool addedToday = false;
     bool addedOther = false;
-
-    print(todoList);
 
     // Divide Today and future.
     for (int i = 0; i < todoList.length; i++) {
