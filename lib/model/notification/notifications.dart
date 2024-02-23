@@ -7,8 +7,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:unfuckyourlife/components/homePage/HomePage.dart';
+import 'package:unfuckyourlife/model/database/delete.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
+import 'package:unfuckyourlife/model/database/update.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 
@@ -158,8 +160,41 @@ Future<void> showNotifChannel(int id) async {
       .showNotiificationAt(channel, DateTime.now().add(Duration(seconds: 5)));
 }
 
-// Create recuring todo
-// Also a comeback for recuring Todo.
+@pragma("vm:entry-point")
+Future<Channel> getChannel(int id) async {
+  final List<Map<String, dynamic>> listChannelMaped =
+      await retrieveChannelById(id);
+  final Map<String, dynamic> channelMaped = listChannelMaped[0];
+
+  final Channel channel = Channel(channelMaped["id"], channelMaped["name"],
+      channelMaped["notifier"], channelMaped["isCustom"] == 1 ? true : false);
+
+  return channel;
+}
+
+// Recuring oneshot function
+Future<void> periodicallyShowTodo(Todo todo) async {
+  var sucess = await AndroidAlarmManager.initialize();
+
+  // TODO: Do start at 
+  await AndroidAlarmManager.periodic(Duration(seconds: todo.durationOfRecuring), todo.id as int, makeNewRecuringTodo, startAt: await todo.getDeadline(), allowWhileIdle: true,
+      exact: true);
+}
+
+Future<void> makeNewRecuringTodo(int id) async {
+  // TODO: Handle the case where user deletes his recuring todo
+  // Retriving todo
+  List<Map<String, dynamic>> todosList = await retrieveTodosById(id);
+  Map<String, dynamic> todoMap = todosList[0];
+  final Todo todo = mapToTodo(todoMap);
+  
+  final Todo newTodo = new Todo(durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
+
+  // Only channel id is needed.
+  updateTodoById(todo, Channel(todo.channel, "Name", 0, false));
+  
+}
+
 void addNewTodoThatIsRecuring(int id) async {
   // Retriving channel
   List<Map<String, dynamic>> todosList = await retrieveTodosById(id);
@@ -209,36 +244,4 @@ void addNewTodoThatIsRecuring(int id) async {
       deadline: deadlineId);
 
   periodicallyShowTodo(newTodoWithRightId);
-}
-
-// Recuring oneshot function
-Future<void> periodicallyShowTodo(Todo todo) async {
-  var sucess = await AndroidAlarmManager.initialize();
-
-  print("One shot at ${todo.durationOfRecuring}");
-
-  DateTime deadline = await todo.getDeadline();
-
-  // todo.id as int should be okay, as I'm asigning it in the _insertTodo function.
-  // deadline.difference(DateTime.now()).inSeconds solves the next day problem, as to the duration is also added the difference between now and deadline
-  await AndroidAlarmManager.oneShot(
-      Duration(
-          seconds: todo.durationOfRecuring +
-              (deadline.difference(DateTime.now()).inSeconds)),
-      todo.id as int,
-      addNewTodoThatIsRecuring,
-      allowWhileIdle: true,
-      exact: true);
-}
-
-@pragma("vm:entry-point")
-Future<Channel> getChannel(int id) async {
-  final List<Map<String, dynamic>> listChannelMaped =
-      await retrieveChannelById(id);
-  final Map<String, dynamic> channelMaped = listChannelMaped[0];
-
-  final Channel channel = Channel(channelMaped["id"], channelMaped["name"],
-      channelMaped["notifier"], channelMaped["isCustom"] == 1 ? true : false);
-
-  return channel;
 }

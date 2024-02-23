@@ -9,6 +9,7 @@ class Todo {
   final int deadline;
   final int channel;
   final bool isRecuring;
+  /// In seconds
   final int durationOfRecuring;
 
   // Id is not required, bcs we don't even use it when building components.
