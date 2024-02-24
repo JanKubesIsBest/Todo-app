@@ -140,7 +140,7 @@ Future<Channel> createNewChannel(Channel channel, TimeOfDay notifyAt) async {
   return returnChannel;
 }
 
-// Oneshot at for channel
+// Periodit for channel
 Future<void> createPeriodicallNotificationWithTimeCalculation(
     Channel channel, DateTime startNotifyingAt) async {
   var sucess = await AndroidAlarmManager.initialize();
@@ -172,7 +172,7 @@ Future<Channel> getChannel(int id) async {
 
 
 
-// Recuring oneshot function
+// Periodic for Todo
 Future<void> periodicallyShowTodo(Todo todo) async {
   var sucess = await AndroidAlarmManager.initialize();
 
