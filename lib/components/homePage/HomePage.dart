@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
   late TimeOfDay notifyAt;
 
   bool isRecuring = false;
-  final List<RecuringDurationWithName> recuringOptions = [const RecuringDurationWithName(name: "Every 10 seconds", durationOfRecuring: Duration(seconds: 10)), const RecuringDurationWithName(name: "Hourly", durationOfRecuring: Duration(hours: 1)), const RecuringDurationWithName(name: "Daily", durationOfRecuring: Duration(days: 1)), const RecuringDurationWithName(name: "Weekly", durationOfRecuring: Duration(days: 7))];
+  final List<RecuringDurationWithName> recuringOptions = [const RecuringDurationWithName(name: "Every minute", durationOfRecuring: Duration(seconds: 60)), const RecuringDurationWithName(name: "Hourly", durationOfRecuring: Duration(hours: 1)), const RecuringDurationWithName(name: "Daily", durationOfRecuring: Duration(days: 1)), const RecuringDurationWithName(name: "Weekly", durationOfRecuring: Duration(days: 7))];
   RecuringDurationWithName recuringDuration = const RecuringDurationWithName(name: "Daily", durationOfRecuring: Duration(days: 1));
 
   List<Channel> channels = [Channel(0, "Custom", 0, true)];

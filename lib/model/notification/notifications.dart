@@ -4,10 +4,8 @@ import 'dart:math';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:unfuckyourlife/components/homePage/HomePage.dart';
-import 'package:unfuckyourlife/model/database/open_databases.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/database/update.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
@@ -43,7 +41,7 @@ class NotificationService {
             importance: Importance.high, icon: '@mipmap/ic_launcher'),
         iOS: DarwinNotificationDetails());
   }
-
+  @pragma("vm:entry-point")
   Future<int> scheduleNotification(
       {int id = 0,
       String? payLoad,
@@ -171,18 +169,35 @@ Future<Channel> getChannel(int id) async {
   return channel;
 }
 
+
+
+
 // Recuring oneshot function
 Future<void> periodicallyShowTodo(Todo todo) async {
   var sucess = await AndroidAlarmManager.initialize();
 
-  // TODO: Do start at 
-  await AndroidAlarmManager.periodic(Duration(seconds: todo.durationOfRecuring), todo.id as int, updateRecuringTodo, allowWhileIdle: true,
+  final Channel channel = await getChannel(todo.channel);
+
+  if (channel.isCustom) {
+    // Get deadline
+    final DateTime deadline = await todo.getDeadline();
+
+    // Get notification
+    final List<Map<String, dynamic>> timeList = await retrieveNotificationsById(channel.notification);
+    final Map<String, dynamic> timeMap = timeList[0];
+    final TimeOfDay timeOfDay = TimeOfDay(hour: timeMap['hour'], minute: timeMap['minute']);
+
+    // If is custom, start when the first notification starts
+    await AndroidAlarmManager.periodic(Duration(seconds: todo.durationOfRecuring), todo.id as int, updateRecuringTodo, allowWhileIdle: true,
+      exact: true, startAt: DateTime(deadline.year, deadline.month, deadline.day, timeOfDay.hour, timeOfDay.minute));
+  } else {
+    await AndroidAlarmManager.periodic(Duration(seconds: todo.durationOfRecuring), todo.id as int, updateRecuringTodo, allowWhileIdle: true,
       exact: true);
+  }
 }
 
 @pragma("vm:entry-point")
 Future<void> updateRecuringTodo(int id) async {
-  // TODO: Handle the case where user deletes his recuring todo
   // Retriving todo
   List<Map<String, dynamic>> todosList = await retrieveTodosById(id);
   Map<String, dynamic> todoMap = todosList[0];
@@ -190,68 +205,21 @@ Future<void> updateRecuringTodo(int id) async {
 
   print("Updating todo");
 
-  // TODO: Update deadline
+  final DateTime deadline = await todo.getDeadline();
+  updateNotificationById(id, deadline.add(Duration(seconds: todo.durationOfRecuring)));
 
   // Just update todo.done to be visible.
   final Todo newTodo = Todo(id: todo.id, done: false, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
 
+  final Channel channel = await getChannel(todo.channel);
+
+  if (channel.isCustom) {
+    print("Scheduling notif");
+    // Make show notif.
+    await NotificationService().scheduleNotification(scheduledNotificationDateTime: DateTime.now().add(const Duration(seconds: 5)), channel: channel);
+  }
+
   // Only channel id is needed.
   updateTodoById(newTodo, Channel(todo.channel, "Does not matter what is here", 0, false));
   
-}
-
-void addNewTodoThatIsRecuring(int id) async {
-  // Retriving channel
-  List<Map<String, dynamic>> todosList = await retrieveTodosById(id);
-  Map<String, dynamic> todoMap = todosList[0];
-  final Todo todo = mapToTodo(todoMap);
-
-  // Scenario for custom is not done yet
-
-  // Retrieving deadline
-  DateTime deadline = await todo.getDeadline();
-
-  // add new deadline
-  int deadlineId = await addNewDeadline(
-    DateTime(
-      deadline.year,
-      deadline.month,
-      deadline.day,
-    ).add(Duration(seconds: todo.durationOfRecuring)),
-  );
-
-  Todo newTodo = Todo(
-      durationOfRecuring: todo.durationOfRecuring,
-      isRecuring: todo.isRecuring,
-      channel: todo.channel,
-      created: todo.created,
-      name: todo.name,
-      description: todo.description,
-      deadline: deadlineId,
-      done: todo.done,
-      );
-
-  // Get a reference to the database.
-  final db = await openOurDatabase();
-
-  int todoInsertedId = await db.insert(
-    'todos',
-    newTodo.toMap(),
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-
-  // TODO: Make this work
-  Todo newTodoWithRightId = Todo(
-      id: todoInsertedId,
-      durationOfRecuring: todo.durationOfRecuring,
-      isRecuring: todo.isRecuring,
-      channel: todo.channel,
-      created: todo.created,
-      name: todo.name,
-      description: todo.description,
-      deadline: deadlineId,
-      done: todo.done,
-      );
-
-  periodicallyShowTodo(newTodoWithRightId);
 }
