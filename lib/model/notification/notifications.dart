@@ -209,7 +209,7 @@ Future<void> updateRecuringTodo(int id) async {
   updateNotificationById(id, deadline.add(Duration(seconds: todo.durationOfRecuring)));
 
   // Just update todo.done to be visible.
-  final Todo newTodo = Todo(id: todo.id, done: false, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
+  final Todo newTodo = Todo(id: todo.id, done: false, durationOfRecuring: todo.durationOfRecuring, isRecuring: true, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
 
   final Channel channel = await getChannel(todo.channel);
 
