@@ -438,7 +438,7 @@ class _HomePageState extends State<HomePage> {
                         channel: channelId,
                         isRecuring: isRecuring,
                         durationOfRecuring: recuringDuration.durationOfRecuring.inSeconds,
-                        done: true,
+                        done: false,
                       );
 
                       // Is recuring is handled in addNewTodoFunction
@@ -459,6 +459,7 @@ class _HomePageState extends State<HomePage> {
 
   void uiUpdateTodos() async {
     List<Todo> retrievedTodos = await retrieveOnlyTodos();
+    
     setState(() {
       todos = retrievedTodos;
     });

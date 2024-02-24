@@ -7,7 +7,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:unfuckyourlife/components/homePage/HomePage.dart';
-import 'package:unfuckyourlife/model/database/delete.dart';
 import 'package:unfuckyourlife/model/database/open_databases.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/database/update.dart';
@@ -177,19 +176,27 @@ Future<void> periodicallyShowTodo(Todo todo) async {
   var sucess = await AndroidAlarmManager.initialize();
 
   // TODO: Do start at 
-  await AndroidAlarmManager.periodic(Duration(seconds: todo.durationOfRecuring), todo.id as int, makeNewRecuringTodo, startAt: await todo.getDeadline(), allowWhileIdle: true,
+  await AndroidAlarmManager.periodic(Duration(seconds: todo.durationOfRecuring), todo.id as int, updateRecuringTodo, allowWhileIdle: true,
       exact: true);
 }
 
-Future<void> makeNewRecuringTodo(int id) async {
+@pragma("vm:entry-point")
+Future<void> updateRecuringTodo(int id) async {
   // TODO: Handle the case where user deletes his recuring todo
   // Retriving todo
   List<Map<String, dynamic>> todosList = await retrieveTodosById(id);
   Map<String, dynamic> todoMap = todosList[0];
   final Todo todo = mapToTodo(todoMap);
 
+  print("Updating todo");
+
+  // TODO: Update deadline
+
+  // Just update todo.done to be visible.
+  final Todo newTodo = Todo(id: todo.id, done: false, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description, deadline: todo.deadline);
+
   // Only channel id is needed.
-  updateTodoById(todo, Channel(todo.channel, "Name", 0, false));
+  updateTodoById(newTodo, Channel(todo.channel, "Does not matter what is here", 0, false));
   
 }
 

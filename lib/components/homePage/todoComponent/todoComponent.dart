@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:unfuckyourlife/model/database/channelClass/channel.dart';
 import 'package:unfuckyourlife/model/database/delete.dart';
+import 'package:unfuckyourlife/model/database/update.dart';
 
 import '../../../model/todo/Todo.dart';
 
@@ -32,7 +34,17 @@ class TodoComponent extends StatelessWidget {
                     ),
                   ),
                   IconButton(onPressed: () async {
-                    await deleteTodo(todo);
+                    print("Delete button was pressed");
+                    // If is recuring, don't delete it, just update it.
+                    if (todo.isRecuring){
+                      print("Updated recuring todo");
+                      // Make done true, everything else will be same
+                      final Todo newTodo = Todo(id: todo.id, done: true, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: todo.created, name: todo.name, description: todo.description + " ", deadline: todo.deadline);
+
+                      await updateTodoById(newTodo, Channel(todo.channel, "Does not matter", 0, false));
+                    } else {
+                      await deleteTodo(todo);
+                    }
                     uiUpdateTodos();
                   }, icon: const Icon(Icons.delete), color: const Color.fromARGB(255, 183, 14, 14),),
                 ],
