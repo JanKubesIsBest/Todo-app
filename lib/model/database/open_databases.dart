@@ -31,7 +31,7 @@ Future<void> createNotifierDatabaseTable(Database db) {
   print("Notif. database build.");
   // Reoccurring is INT because there is no native way of making bool in SQL
   return db.execute(
-    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING)',
+    'CREATE TABLE notifications(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, hour STRING, minute STRING, channel_id INT)',
   );
 }
 

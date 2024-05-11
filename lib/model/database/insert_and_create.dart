@@ -66,8 +66,15 @@ Future<int> _insertChannel(database, Channel channel, DateTime date) async {
   );
 }
 
-Future<int> addNewDeadline( DateTime date) async {
+Future<int> addNewDeadline( DateTime date, Channel channel) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Check how many times you will need to create instance of todo (if recuring)
+
+  // Make a for loop
+
+  // in the for loop, create each notifier instance and todo instance
+
+
   final database = await openOurDatabase();
   return _insertNewDeadline(database, date,);
 }
