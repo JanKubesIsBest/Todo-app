@@ -41,9 +41,9 @@ class _HomePageState extends State<HomePage> {
   final List<RecuringDurationWithName> recuringOptions = [const RecuringDurationWithName(name: "Every minute", durationOfRecuring: Duration(seconds: 60)), const RecuringDurationWithName(name: "Hourly", durationOfRecuring: Duration(hours: 1)), const RecuringDurationWithName(name: "Daily", durationOfRecuring: Duration(days: 1)), const RecuringDurationWithName(name: "Weekly", durationOfRecuring: Duration(days: 7))];
   RecuringDurationWithName recuringDuration = const RecuringDurationWithName(name: "Daily", durationOfRecuring: Duration(days: 1));
 
-  List<Channel> channels = [Channel(0, "Custom", 0, true)];
+  List<Channel> channels = [Channel(0, "Custom", true, 0, 0)];
 
-  Channel selectedChannel = Channel(0, "Custom", 0, true);
+  Channel selectedChannel = Channel(0, "Custom", true, 0, 0);
 
   // Declare and initizlize the page controller
   final PageController _pageController = PageController(initialPage: 0);
@@ -110,9 +110,9 @@ class _HomePageState extends State<HomePage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("notifying") != true) {
       // The only thing that is needed is name and is custom, so does not matter much
-      Channel defaultChannel = Channel(0, "Default", 0, false);
+      final Channel defaultChannel = Channel(0, "Default", false, defaultNotifyingTime.hour, defaultNotifyingTime.minute);
 
-      await createNewChannel(defaultChannel, defaultNotifyingTime);
+      await defaultChannel.createItself();
       prefs.setBool("notifying", true);
     }
   }
@@ -148,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                   if (index == 0) {
                     return TodoList(
                       channel:
-                          Channel(0, "Does not matter what is here", 0, false),
+                          Channel(0, "Does not matter what is here", false, 0, 0),
                       todos: todos,
                       uiUpdateTodos: uiUpdateTodos,
                       showAll: true,
@@ -242,7 +242,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _showMyDialog() {
-    selectedChannel = Channel(0, "Custom", 0, true);
+    selectedChannel = Channel(0, "Custom", true, 0, 0);
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -499,12 +499,13 @@ class _HomePageState extends State<HomePage> {
 
   Future<List<Channel>> getChannelsInChannelClassType() async {
     List<Map<String, dynamic>> channelsMap = await retrieveChannels();
-    List<Channel> newChannels = [Channel(0, "Custom", 0, true)];
+    List<Channel> newChannels = [Channel(0, "Custom", true, 0, 0)];
+    
     for (final Map<String, dynamic> map in channelsMap) {
       // If the channel is custom, don't add it as every custom channel is special.
       if (map['isCustom'] != 1) {
         newChannels
-            .add(Channel(map['id'], map['name'], map['notifier'], false));
+            .add(Channel(map['id'], map['name'], false, map['hour'], map['minute']));
       }
     }
 

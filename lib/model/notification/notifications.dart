@@ -43,7 +43,6 @@ class NotificationService {
         iOS: DarwinNotificationDetails());
   }
 
-  @pragma("vm:entry-point")
   Future<void> showNotificationAt(Channel channel, NotificationInfo notif) async {
     print("Show notif");
 

@@ -26,15 +26,15 @@ Future<void> addNewTodoToDatabase(Todo todo, bool isCustom) async {
     // Make a for loop
     // <= because there can be just one instance
     for (int i = 0; i <= howManyTimes; i++) {
+      // in the for loop, create each notifier instance and todo instance
       final Duration addDurationToCreatedInSeconds = Duration(seconds: i * todo.durationOfRecuring,);
 
       final Todo newTodo = Todo(done: false, durationOfRecuring: todo.durationOfRecuring, isRecuring: todo.isRecuring, channel: todo.channel, created: firstInstance.add(addDurationToCreatedInSeconds), name: todo.name, description: todo.description, deadline: todo.deadline);
-      _insertTodo(database, todo, isCustom);
+      _insertTodo(database, newTodo, isCustom);
     }
-
-    // in the for loop, create each notifier instance and todo instance
+  } else {
+    _insertTodo(database, todo, isCustom);
   }
-
 }
 
 /// Adds Todo to database and makes a zoned notification for it (if it is custom).
@@ -50,32 +50,41 @@ Future<void> _insertTodo(Database db, Todo todo, bool isCustom) async {
   if (isCustom) {
     // Create new custom channel 
     // New channel name is a name of the custom todo, as that's what's going to display in the notification
-    insertChannel(db, Channel(0, todo.name, isCustom), todo.created);
+    insertChannel(db, Channel(0, todo.name, isCustom, 0, 0), todo.created);
   }
 }
 
+/// Creates a channel, with one notification.
 Future<int> insertChannel(Database db, Channel channel, DateTime date) async {
-  // Add notifier
-  final int databaseId = await _insertNotification(db, date);
-
-  NotificationInfo notifInfo = NotificationInfo(time: date, id: databaseId);
-
-  // Create zoned schedule
-  NotificationService().showNotificationAt(channel, notifInfo);
-
-  return await db.insert(
+  // Create channel
+  final int channelId = await db.insert(
     'channels',
-    {'name': channel.name, 'notifier': databaseId, 'isCustom': channel.isCustom ? 1 : 0},
+    {'name': channel.name, 'isCustom': channel.isCustom ? 1 : 0, 'hour': date.hour, 'minute': date.minute},
     conflictAlgorithm: ConflictAlgorithm.ignore,
   );
+
+  final Channel channelWithUpdatedId = Channel(channelId, channel.name, channel.isCustom, channel.hour, channel.minute);
+
+  // Add notifier
+  await insertNotification(db, date, channelWithUpdatedId);
+
+  return channelId;
 }
 
-Future<int> _insertNotification(Database db, DateTime date,)async {
-  return await db.insert(
+/// Add notification to the database and makes a zoned notif for it.
+Future<NotificationInfo> insertNotification(Database db, DateTime date, Channel channel) async {
+  final int notifId = await db.insert(
     'notifications',
     {'day': date.day.toString(), 'month': date.month.toString(), 'year': date.year.toString(), 'hour': date.hour.toString(), 'minute':date.minute.toString()},
     conflictAlgorithm: ConflictAlgorithm.ignore,
   );
+
+  NotificationInfo notifInfo = NotificationInfo(time: date, id: notifId);
+
+  // Create zoned schedule
+  NotificationService().showNotificationAt(channel, notifInfo);
+
+  return NotificationInfo(time: date, id: notifId);
 }
 
 Future<int> addNewDeadline( DateTime date,) async {

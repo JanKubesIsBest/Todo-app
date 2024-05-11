@@ -65,7 +65,7 @@ class _todoComponentState extends State<TodoComponent> {
                             deadline: todo.deadline);
 
                         await updateTodoById(newTodo,
-                            Channel(todo.channel, "Does not matter", 0, false));
+                            Channel(todo.channel, "Does not matter", false, 0, 0));
                       } else {
                         await deleteTodo(todo);
                       }

@@ -58,17 +58,8 @@ class _TodoButtonState extends State<TodoButton> {
                     ) : const SizedBox(),
                   ],
                 ),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: retrieveNotificationsById(widget.channel.deadline),
-                  builder: ((context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Text(
-                          "${snapshot.data![0]["hour"]}:${snapshot.data![0]["minute"]}");
-                    } else {
-                      return const CircularProgressIndicator();
-                    }
-                  }),
-                ),
+                      Text(
+                          "${widget.channel.hour}:${widget.channel.minute}"),
               ],
             ),
           ),
@@ -134,9 +125,10 @@ class _TodoButtonState extends State<TodoButton> {
                   child: const Text('Edit'),
                   onPressed: () async {
                     print(await NotificationService().getActiveNotifications());
-                    // Delete the notification
-                    NotificationService()
-                        .cancelNotification(widget.channel.deadline);
+                    // // Delete the notification
+                    // NotificationService()
+                    //     .cancelNotification(widget.channel.deadline);
+
                     // Delete periodic timer manager 
                     AndroidAlarmManager.initialize();
                     AndroidAlarmManager.cancel(widget.channel.id);
@@ -151,8 +143,8 @@ class _TodoButtonState extends State<TodoButton> {
                     );
 
                     // Id is meant an id of a channel.
-                    createPeriodicallNotificationWithTimeCalculation(
-                        widget.channel, startNotifyingAt);
+                    // createPeriodicallNotificationWithTimeCalculation(
+                    //     widget.channel, startNotifyingAt);
 
                     // Update Notification row with right time:
                     updateNotificationById(widget.channel.id, startNotifyingAt);

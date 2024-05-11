@@ -30,8 +30,7 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
     print(channelsMaped);
     List<Channel> newChannel = [];
     for (Map<String, dynamic> channelMap in channelsMaped) {
-      newChannel.add(Channel(channelMap["id"], channelMap["name"],
-          channelMap["notifier"], channelMap["isCustom"] == 1 ? true : false));
+      newChannel.add(Channel(channelMap["id"], channelMap["name"], channelMap["isCustom"] == 1 ? true : false, channelMap["hour"],  channelMap["minute"]));
     }
     print(newChannel);
     return newChannel;
@@ -175,8 +174,8 @@ class _DrawerWithChannelsState extends State<DrawerWithChannels> {
     print("Adding new channel");
 
     // The only thing that is needed is name and is custom, so does not matter much
-    Channel newChannel = Channel(0, newChannelNameController.text, 0, false);
+    Channel newChannel = Channel(0, newChannelNameController.text, false, 0, 0);
 
-    await createNewChannel(newChannel, notifyAt); 
+    newChannel.createItself();
   }
 }
