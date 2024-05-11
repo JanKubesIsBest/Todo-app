@@ -52,7 +52,7 @@ class Todo {
     
     if (mapedNotifList.isNotEmpty) {
       Map<String, dynamic> mapedNotif = mapedNotifList[0];
-      return DateTime(mapedNotif['year'], mapedNotif['month'], mapedNotif['day'],);
+      return DateTime(mapedNotif['year'], mapedNotif['month'], mapedNotif['day'], mapedNotif['hour'], mapedNotif['minute'],);
     }
     else {
       // should not happen

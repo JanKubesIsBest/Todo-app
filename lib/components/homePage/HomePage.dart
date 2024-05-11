@@ -427,6 +427,8 @@ class _HomePageState extends State<HomePage> {
                           selectedDateForDeadline.year,
                           selectedDateForDeadline.month,
                           selectedDateForDeadline.day,
+                          notifyAt.hour,
+                          notifyAt.minute,
                         ),
                       );  
 
@@ -442,7 +444,7 @@ class _HomePageState extends State<HomePage> {
                       );
 
                       // Is recuring is handled in addNewTodoFunction
-                      await addNewTodoToDatabase(newTodo);
+                      await addNewTodoToDatabase(newTodo, selectedChannel.isCustom,);
                       uiUpdateTodos();
 
                       Navigator.of(context).pop();
