@@ -39,7 +39,7 @@ Future<void> createChannelDatabase(Database db) {
   print("Channel database build.");
   // Every custom tod+o has it's own channel column named deadline.
   return db.execute(
-    'CREATE TABLE channels(id INTEGER PRIMARY KEY, name STRING, notifier INTEGER, isCustom INTEGER)',
+    'CREATE TABLE channels(id INTEGER PRIMARY KEY, name STRING, isCustom INTEGER, hour INTEGER, minute INTEGER)',
   );
 }
 
@@ -47,6 +47,6 @@ Future<void> createDeadlineDatabaseTable(Database db) {
   print("Notif. database build.");
   // Reoccurring is INT because there is no native way of making bool in SQL
   return db.execute(
-    'CREATE TABLE deadlines(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING)',
+    'CREATE TABLE deadlines(id INTEGER PRIMARY KEY, day STRING, month STRING, year STRING, minute STRING, hour STRING)',
   );
 }

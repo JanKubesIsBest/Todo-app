@@ -8,6 +8,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:unfuckyourlife/components/homePage/HomePage.dart';
 import 'package:unfuckyourlife/model/database/retrieve.dart';
 import 'package:unfuckyourlife/model/database/update.dart';
+import 'package:unfuckyourlife/model/notification/notification_class.dart';
 import 'package:unfuckyourlife/model/todo/Todo.dart';
 import 'package:unfuckyourlife/model/todo/mapToTodo.dart';
 
@@ -41,19 +42,9 @@ class NotificationService {
             importance: Importance.high, icon: '@mipmap/ic_launcher'),
         iOS: DarwinNotificationDetails());
   }
-  
-  @pragma("vm:entry-point")
-  Future<int> scheduleNotification(
-      {int id = 0,
-      String? payLoad,
-      required DateTime scheduledNotificationDateTime,
-      required Channel channel}) async {
 
-        return 0;
-  }
-  
   @pragma("vm:entry-point")
-  Future<void> showNotiificationAt(Channel channel, DateTime time) async {
+  Future<void> showNotificationAt(Channel channel, NotificationInfo notif) async {
     print("Show notif");
 
     await configureLocalTimeZone();
@@ -61,10 +52,10 @@ class NotificationService {
     await notificationsPlugin.zonedSchedule(
       // Notification is referenced in notif table in the database
       // This is working
-      Random().nextInt(1000000),
+      notif.id,
       channel.name,
       "TODO Make description",
-      tz.TZDateTime.from(time, tz.local),
+      tz.TZDateTime.from(notif.time, tz.local),
       await notificationDetails(),
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,

@@ -87,7 +87,7 @@ Future<void> _deleteChannel(Channel channel, Database database) async {
   final db = database;
 
   // Cancel the pending notif.
-  NotificationService().cancelNotification(channel.notification);
+  NotificationService().cancelNotification(channel.deadline);
 
   // Remove notification from the database
   await db.delete(
@@ -95,7 +95,7 @@ Future<void> _deleteChannel(Channel channel, Database database) async {
     // Use a `where` clause to delete a specific T_odo.
     where: 'id = ?',
     // Pass the T_odo's id as a whereArg to prevent SQL injection.
-    whereArgs: [channel.notification],
+    whereArgs: [channel.deadline],
   );
 
   // Remove the custom channel

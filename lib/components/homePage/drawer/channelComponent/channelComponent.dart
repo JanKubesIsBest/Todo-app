@@ -59,7 +59,7 @@ class _TodoButtonState extends State<TodoButton> {
                   ],
                 ),
                 FutureBuilder<List<Map<String, dynamic>>>(
-                  future: retrieveNotificationsById(widget.channel.notification),
+                  future: retrieveNotificationsById(widget.channel.deadline),
                   builder: ((context, snapshot) {
                     if (snapshot.hasData) {
                       return Text(
@@ -136,7 +136,7 @@ class _TodoButtonState extends State<TodoButton> {
                     print(await NotificationService().getActiveNotifications());
                     // Delete the notification
                     NotificationService()
-                        .cancelNotification(widget.channel.notification);
+                        .cancelNotification(widget.channel.deadline);
                     // Delete periodic timer manager 
                     AndroidAlarmManager.initialize();
                     AndroidAlarmManager.cancel(widget.channel.id);

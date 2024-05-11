@@ -7,7 +7,7 @@ Future<void> updateChannelById(Channel newChannel) async {
 
   database.update(
     'channels',
-    {'name': newChannel.name, 'notifier': newChannel.notification, 'isCustom': newChannel.isCustom ? 1 : 0},
+    {'name': newChannel.name, 'notifier': newChannel.deadline, 'isCustom': newChannel.isCustom ? 1 : 0},
       // Ensure that the Todo has a matching id.
     where: 'id = ?',
     // Pass the Todo id as a whereArg to prevent SQL injection.

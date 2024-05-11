@@ -396,30 +396,7 @@ class _HomePageState extends State<HomePage> {
                   TextButton(
                     child: const Text('Add'),
                     onPressed: () async {
-                      // If the notification notifying time will be different from the time that all notifications are
-                      // are reminded ("Check all your tasks" after school day or something like that), add the notification time.
-
-                      // Add new channel or connected to already created one
-                      // If the the custom option is selected, you always make new channels that have custom attributes
                       int channelId = selectedChannel.id;
-
-                      // Is recuring is handled in addNewTodoFunction
-                      if (selectedChannel.isCustom == true) {
-                        print("Custom !!!!!!");
-                        DateTime date = DateTime(
-                          selectedDateForDeadline.year,
-                          selectedDateForDeadline.month,
-                          selectedDateForDeadline.day,
-                          notifyAt.hour,
-                          notifyAt.minute,
-                        );
-
-                        channelId =
-                            await NotificationService().scheduleNotification(
-                          scheduledNotificationDateTime: date,
-                          channel: selectedChannel,
-                        );
-                      }
 
                       // add new deadline
                       int deadlineId = await addNewDeadline(
