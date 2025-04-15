@@ -11,7 +11,7 @@ The app has one core feature: channels. Each channel has its own time frame for 
 The app also allows for custom notification todos, which remind you at a specific time of your choosing. Todos can be recurring or one-time.
 
 Enjoy a recording of how you can add a new channel, create a normal todo, and set up a recurring todo:
-https://github.com/user-attachments/assets/f1bf9961-b60e-46da-aff8-3c3ece93e4c4
+[![Video Preview](path-to-thumbnail-or-gif.png)](https://github.com/user-attachments/assets/f1bf9961-b60e-46da-aff8-3c3ece93e4c4)
 
 ### Onboarding
 Around this time, I wanted to create an onboarding experience for the app in the style of: *let’s build a connection with the user.*
